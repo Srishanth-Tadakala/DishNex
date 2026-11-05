@@ -519,7 +519,7 @@ const styles = StyleSheet.create({
     ...shadows.card,
   },
   sectionCardIvory: {
-    backgroundColor: '#FFF8EA',
+    backgroundColor: '#F4F0E7',
     borderRadius: radii.xl,
     padding: spacing.lg,
     borderWidth: 1,
@@ -542,12 +542,12 @@ const styles = StyleSheet.create({
   cardHeaderTitleDark: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#071A14',
+    color: '#06130F',
   },
   changeLink: {
     fontSize: 13,
     fontWeight: '700',
-    color: '#24563B',
+    color: '#244D3A',
   },
   scheduleLink: {
     fontSize: 13,
@@ -573,7 +573,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#EFE9DC',
+    backgroundColor: '#EDE8DD',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: spacing.md,
@@ -589,7 +589,7 @@ const styles = StyleSheet.create({
   addressLabelDark: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#071A14',
+    color: '#06130F',
   },
   addressText: {
     fontSize: 12,

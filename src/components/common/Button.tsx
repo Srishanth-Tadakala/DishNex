@@ -102,7 +102,7 @@ export const Button: React.FC<ButtonProps> = ({
 
     // Variant
     if (variant === 'primary') {
-      base.backgroundColor = colors.accent; // Luminous Lime #DFFF63
+      base.backgroundColor = colors.accent; // Signature Chartreuse Lime #D8F06B
       base.borderWidth = 1;
       base.borderColor = 'rgba(255, 255, 255, 0.25)';
       Object.assign(base, shadows.accent);

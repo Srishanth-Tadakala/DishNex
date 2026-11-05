@@ -40,7 +40,7 @@ export function SegmentedControl<T extends string>({
         if (Platform.OS !== 'web') {
           Haptics.selectionAsync();
         }
-      } catch (_) {}
+      } catch (_) { }
       onSelect(key);
     }
   };

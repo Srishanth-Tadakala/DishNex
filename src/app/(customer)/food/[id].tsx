@@ -201,7 +201,7 @@ export default function FoodDetailsScreen() {
               reviewsCount={dish.reviewsCount}
               size="medium"
               showCountText={true}
-              textColor="#071A14"
+              textColor="#06130F"
             />
           </View>
 
@@ -373,7 +373,7 @@ const styles = StyleSheet.create({
     marginTop: -28,
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
-    backgroundColor: '#FFF8EA',
+    backgroundColor: '#F4F0E7',
     paddingHorizontal: spacing.xxl,
     paddingTop: spacing.xxl,
     borderWidth: 1,
@@ -390,7 +390,7 @@ const styles = StyleSheet.create({
     fontFamily: 'serif',
     fontSize: 24,
     fontWeight: '700',
-    color: '#071A14',
+    color: '#06130F',
     flex: 1,
     paddingRight: spacing.md,
   },
@@ -411,7 +411,7 @@ const styles = StyleSheet.create({
   },
   badgeCard: {
     flex: 1,
-    backgroundColor: '#0B2118',
+    backgroundColor: colors.surface,
     borderRadius: radii.lg,
     paddingVertical: 12,
     alignItems: 'center',
@@ -437,7 +437,7 @@ const styles = StyleSheet.create({
   addonsSectionTitle: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#071A14',
+    color: '#06130F',
     marginBottom: spacing.md,
   },
   addonItem: {
@@ -468,13 +468,13 @@ const styles = StyleSheet.create({
   },
   addonName: {
     fontSize: 14,
-    color: '#071A14',
+    color: '#06130F',
     fontWeight: '500',
   },
   addonPrice: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#071A14',
+    color: '#06130F',
   },
   bottomBar: {
     position: 'absolute',

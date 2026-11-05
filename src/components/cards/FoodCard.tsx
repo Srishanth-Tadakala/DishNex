@@ -128,7 +128,7 @@ export const FoodCard: React.FC<FoodCardProps> = ({
           rating={item.rating}
           reviewsCount={item.reviewsCount}
           size="small"
-          textColor={isIvory ? '#071A14' : undefined}
+          textColor={isIvory ? '#06130F' : undefined}
         />
 
         <Text style={[styles.price, isIvory && styles.priceIvory]}>
@@ -187,14 +187,14 @@ const styles = StyleSheet.create({
     ...shadows.card,
   },
   cardIvory: {
-    backgroundColor: '#FFF8EA',
+    backgroundColor: '#F4F0E7',
     borderColor: 'rgba(0, 0, 0, 0.06)',
   },
   nameIvory: {
-    color: '#071A14',
+    color: '#06130F',
   },
   priceIvory: {
-    color: '#071A14',
+    color: '#06130F',
   },
   image: {
     width: 76,

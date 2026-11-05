@@ -42,14 +42,14 @@ export const shadows = {
     elevation: 8,
   },
   accent: {
-    shadowColor: '#DFFF63',
+    shadowColor: '#D8F06B',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.35,
     shadowRadius: 12,
     elevation: 6,
   },
   emeraldGlow: {
-    shadowColor: '#48C783',
+    shadowColor: '#244D3A',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.25,
     shadowRadius: 10,
