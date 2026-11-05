@@ -1,18 +1,22 @@
 // ==============================================================================
-// EMBER BUTTON COMPONENT (Design System Specification)
+// DISHNEX BUTTON COMPONENT (Design System Specification)
+// Luminous Lime Action Buttons with Micro-Interactions & Haptic Response
 // ==============================================================================
 
-import React from 'react';
+import React, { useRef } from 'react';
 import {
-  TouchableOpacity,
+  Animated,
+  Pressable,
   Text,
   StyleSheet,
   ActivityIndicator,
   ViewStyle,
   TextStyle,
   View,
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import { colors } from '../../theme/colors';
 import { radii, spacing, shadows } from '../../theme/spacing';
 
@@ -43,6 +47,34 @@ export const Button: React.FC<ButtonProps> = ({
   style,
   textStyle,
 }) => {
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+
+  const handlePressIn = () => {
+    if (disabled || loading) return;
+    try {
+      if (Platform.OS !== 'web') {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      }
+    } catch (_) {}
+
+    Animated.spring(scaleAnim, {
+      toValue: 0.97,
+      useNativeDriver: true,
+      speed: 40,
+      bounciness: 4,
+    }).start();
+  };
+
+  const handlePressOut = () => {
+    if (disabled || loading) return;
+    Animated.spring(scaleAnim, {
+      toValue: 1,
+      useNativeDriver: true,
+      speed: 40,
+      bounciness: 4,
+    }).start();
+  };
+
   const getContainerStyle = (): ViewStyle => {
     let base: ViewStyle = {
       flexDirection: 'row',
@@ -70,12 +102,14 @@ export const Button: React.FC<ButtonProps> = ({
 
     // Variant
     if (variant === 'primary') {
-      base.backgroundColor = colors.accent;
+      base.backgroundColor = colors.accent; // Luminous Lime #DFFF63
+      base.borderWidth = 1;
+      base.borderColor = 'rgba(255, 255, 255, 0.25)';
       Object.assign(base, shadows.accent);
     } else if (variant === 'secondary') {
-      base.backgroundColor = colors.surfaceSecondary;
+      base.backgroundColor = colors.surfaceSecondary; // Deep emerald surface
       base.borderWidth = 1;
-      base.borderColor = colors.borderSubtle;
+      base.borderColor = colors.border;
     } else if (variant === 'outline') {
       base.backgroundColor = 'transparent';
       base.borderWidth = 1.5;
@@ -98,58 +132,72 @@ export const Button: React.FC<ButtonProps> = ({
       fontSize: size === 'small' ? 13 : size === 'medium' ? 14 : 16,
       fontWeight: '700',
       color: isPrimary ? colors.textDark : colors.textPrimary,
-      letterSpacing: 0.3,
+      letterSpacing: isPrimary ? 0.3 : 0.2,
     };
   };
 
-  const iconColor = variant === 'primary' ? colors.textDark : colors.textPrimary;
-  const iconSize = size === 'small' ? 16 : 18;
+  const iconColor =
+    variant === 'primary' ? colors.textDark : colors.textPrimary;
+  const iconSize = size === 'small' ? 16 : size === 'medium' ? 18 : 20;
 
   return (
-    <TouchableOpacity
-      activeOpacity={0.85}
-      onPress={onPress}
-      disabled={disabled || loading}
-      style={[getContainerStyle(), style]}
+    <Animated.View
+      style={[
+        fullWidth && { width: '100%' },
+        { transform: [{ scale: scaleAnim }] },
+      ]}
     >
-      {loading ? (
-        <ActivityIndicator color={iconColor} size="small" />
-      ) : (
-        <View style={styles.content}>
-          {iconLeft && (
-            <Ionicons
-              name={iconLeft}
-              size={iconSize}
-              color={iconColor}
-              style={styles.iconLeft}
-            />
-          )}
-          <Text style={[getTextStyle(), textStyle]}>{title}</Text>
-          {iconRight && (
-            <Ionicons
-              name={iconRight}
-              size={iconSize}
-              color={iconColor}
-              style={styles.iconRight}
-            />
-          )}
-        </View>
-      )}
-    </TouchableOpacity>
+      <Pressable
+        onPress={onPress}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        disabled={disabled || loading}
+        style={[getContainerStyle(), style]}
+        accessibilityRole="button"
+        accessibilityLabel={title}
+        accessibilityState={{ disabled: disabled || loading }}
+      >
+        {loading ? (
+          <ActivityIndicator
+            size="small"
+            color={variant === 'primary' ? colors.textDark : colors.accent}
+          />
+        ) : (
+          <View style={styles.contentRow}>
+            {iconLeft && (
+              <Ionicons
+                name={iconLeft}
+                size={iconSize}
+                color={iconColor}
+                style={styles.iconLeft}
+              />
+            )}
+            <Text style={[getTextStyle(), textStyle]}>{title}</Text>
+            {iconRight && (
+              <Ionicons
+                name={iconRight}
+                size={iconSize}
+                color={iconColor}
+                style={styles.iconRight}
+              />
+            )}
+          </View>
+        )}
+      </Pressable>
+    </Animated.View>
   );
 };
 
 const styles = StyleSheet.create({
-  content: {
+  contentRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
   },
   iconLeft: {
-    marginRight: 8,
+    marginRight: spacing.sm,
   },
   iconRight: {
-    marginLeft: 8,
+    marginLeft: spacing.sm,
   },
 });
-

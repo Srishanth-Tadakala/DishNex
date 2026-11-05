@@ -1,8 +1,8 @@
 // ==============================================================================
-// SCREENS 02, 03, 04 — ONBOARDING FLOW
+// SCREENS 02, 03, 04 — ONBOARDING FLOW (DishNex Brand & Fluid Page Transitions)
 // ==============================================================================
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -10,13 +10,16 @@ import {
   Image,
   Dimensions,
   TouchableOpacity,
+  Animated,
+  Platform,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { colors } from '../../../theme/colors';
-import { radii, spacing } from '../../../theme/spacing';
-import { EmberFlameLogo } from '../../../components/common/EmberFlameLogo';
-import { useAuthStore } from '../../../store/authStore';
 import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
+import { colors } from '../../../theme/colors';
+import { radii, spacing, shadows } from '../../../theme/spacing';
+import { DishNexFlameLogo } from '../../../components/common/EmberFlameLogo';
+import { useAuthStore } from '../../../store/authStore';
 
 const { width, height } = Dimensions.get('window');
 
@@ -62,15 +65,64 @@ export default function OnboardingScreen() {
     isNaN(initialIndex) || initialIndex < 0 || initialIndex > 2 ? 0 : initialIndex
   );
 
+  // Transition animations
+  const fadeAnim = useRef(new Animated.Value(1)).current;
+  const slideAnim = useRef(new Animated.Value(0)).current;
+  const btnScale = useRef(new Animated.Value(1)).current;
+
   const currentSlide = SLIDES[currentIndex];
   const isLast = currentIndex === SLIDES.length - 1;
 
+  useEffect(() => {
+    // Entrance animation when slide changes
+    fadeAnim.setValue(0);
+    slideAnim.setValue(15);
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 320,
+        useNativeDriver: true,
+      }),
+      Animated.spring(slideAnim, {
+        toValue: 0,
+        friction: 6,
+        tension: 40,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [currentIndex]);
+
   const handleFinish = () => {
+    try {
+      if (Platform.OS !== 'web') {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      }
+    } catch (_) {}
     setOnboardingCompleted(true);
     router.replace('/(customer)/(tabs)');
   };
 
   const handleNext = () => {
+    try {
+      if (Platform.OS !== 'web') {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      }
+    } catch (_) {}
+
+    Animated.sequence([
+      Animated.timing(btnScale, {
+        toValue: 0.94,
+        duration: 80,
+        useNativeDriver: true,
+      }),
+      Animated.spring(btnScale, {
+        toValue: 1,
+        friction: 4,
+        tension: 50,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
     if (isLast) {
       handleFinish();
     } else {
@@ -94,17 +146,25 @@ export default function OnboardingScreen() {
         <View style={styles.scrimTop} />
         <View style={styles.scrimBottom} />
 
-        {/* Small Flame Branding Header */}
+        {/* Small Flame Branding Header (Screen 2 Reference) */}
         <View style={styles.headerBrand}>
-          <EmberFlameLogo size="small" showTagline={false} />
+          <DishNexFlameLogo size="small" showTagline={false} />
         </View>
       </View>
 
-      {/* Editorial Text Content */}
-      <View style={styles.contentSection}>
+      {/* Editorial Text Content with Smooth Animated Fade */}
+      <Animated.View
+        style={[
+          styles.contentSection,
+          {
+            opacity: fadeAnim,
+            transform: [{ translateY: slideAnim }],
+          },
+        ]}
+      >
         <Text style={styles.headline}>{currentSlide.headline}</Text>
         <Text style={styles.subtitle}>{currentSlide.subtitle}</Text>
-      </View>
+      </Animated.View>
 
       {/* Footer Navigation: Skip | 3-dot pagination | Next / Get Started button */}
       <View style={styles.footerRow}>
@@ -112,11 +172,13 @@ export default function OnboardingScreen() {
           onPress={handleSkip}
           activeOpacity={0.7}
           hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+          accessibilityRole="button"
+          accessibilityLabel="Skip onboarding"
         >
           <Text style={styles.skipText}>Skip</Text>
         </TouchableOpacity>
 
-        {/* Pagination Dots */}
+        {/* Pagination Dots with Luminous Lime Active Indicator */}
         <View style={styles.paginationDots}>
           {SLIDES.map((_, idx) => (
             <View
@@ -130,23 +192,27 @@ export default function OnboardingScreen() {
         </View>
 
         {/* Action Button */}
-        <TouchableOpacity
-          onPress={handleNext}
-          activeOpacity={0.85}
-          style={styles.nextButton}
-        >
-          <Text style={styles.nextButtonText}>
-            {isLast ? 'Get Started' : 'Next'}
-          </Text>
-          {!isLast && (
-            <Ionicons
-              name="arrow-forward"
-              size={16}
-              color={colors.textDark}
-              style={styles.nextIcon}
-            />
-          )}
-        </TouchableOpacity>
+        <Animated.View style={{ transform: [{ scale: btnScale }] }}>
+          <TouchableOpacity
+            onPress={handleNext}
+            activeOpacity={0.85}
+            style={styles.nextButton}
+            accessibilityRole="button"
+            accessibilityLabel={isLast ? 'Get Started' : 'Next slide'}
+          >
+            <Text style={styles.nextButtonText}>
+              {isLast ? 'Get Started' : 'Next'}
+            </Text>
+            {!isLast && (
+              <Ionicons
+                name="arrow-forward"
+                size={16}
+                color={colors.textDark}
+                style={styles.nextIcon}
+              />
+            )}
+          </TouchableOpacity>
+        </Animated.View>
       </View>
     </View>
   );
@@ -173,7 +239,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: 100,
-    backgroundColor: 'rgba(6, 19, 15, 0.4)',
+    backgroundColor: 'rgba(7, 26, 20, 0.45)',
   },
   scrimBottom: {
     position: 'absolute',
@@ -230,8 +296,9 @@ const styles = StyleSheet.create({
     marginHorizontal: 3,
   },
   activeDot: {
-    width: 20,
+    width: 22,
     backgroundColor: colors.accent,
+    ...shadows.accent,
   },
   inactiveDot: {
     width: 6,
@@ -245,6 +312,9 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 22,
     borderRadius: radii.full,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.25)',
+    ...shadows.accent,
   },
   nextButtonText: {
     fontSize: 14,
@@ -255,4 +325,3 @@ const styles = StyleSheet.create({
     marginLeft: 6,
   },
 });
-

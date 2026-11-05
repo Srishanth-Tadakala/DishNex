@@ -1,10 +1,11 @@
 // ==============================================================================
-// EMBER DIETARY BADGE (Veg / Non-Veg Indicator)
+// DISHNEX DIETARY BADGE (Veg / Non-Veg Indicator)
 // ==============================================================================
 
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { DietaryClassification } from '../../types';
+import { colors } from '../../theme/colors';
 
 interface DietaryBadgeProps {
   type: DietaryClassification;
@@ -16,7 +17,7 @@ export const DietaryBadge: React.FC<DietaryBadgeProps> = ({
   size = 14,
 }) => {
   const isVeg = type === 'veg' || type === 'vegan';
-  const color = isVeg ? '#4CAF50' : '#E53935';
+  const color = isVeg ? colors.veg : colors.nonVeg;
 
   const dotSize = Math.max(5, Math.floor(size * 0.45));
 
@@ -30,6 +31,8 @@ export const DietaryBadge: React.FC<DietaryBadgeProps> = ({
           borderColor: color,
         },
       ]}
+      accessibilityRole="text"
+      accessibilityLabel={isVeg ? 'Vegetarian dish' : 'Non-vegetarian dish'}
     >
       <View
         style={[
@@ -56,4 +59,3 @@ const styles = StyleSheet.create({
   },
   dot: {},
 });
-

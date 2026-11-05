@@ -1,5 +1,5 @@
 // ==============================================================================
-// SCREEN 07 — MENU / CATEGORIES
+// SCREEN 07 — MENU / CATEGORIES (DishNex Category Hub & Micro-Interactions)
 // ==============================================================================
 
 import React, { useEffect, useState } from 'react';
@@ -10,10 +10,12 @@ import {
   ScrollView,
   TouchableOpacity,
   FlatList,
+  Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import * as Haptics from 'expo-haptics';
 import { colors } from '../../../theme/colors';
-import { radii, spacing } from '../../../theme/spacing';
+import { radii, spacing, shadows } from '../../../theme/spacing';
 import { Header } from '../../../components/common/Header';
 import { CategoryCard } from '../../../components/cards/CategoryCard';
 import { api } from '../../../services/api';
@@ -33,6 +35,17 @@ export default function MenuScreen() {
     }
     fetchCategories();
   }, []);
+
+  const handleFilterPress = (tag: string) => {
+    if (tag !== activeFilter) {
+      try {
+        if (Platform.OS !== 'web') {
+          Haptics.selectionAsync();
+        }
+      } catch (_) {}
+      setActiveFilter(tag);
+    }
+  };
 
   const filteredCategories = categories.filter((cat) => {
     if (activeFilter === 'All') return true;
@@ -65,11 +78,13 @@ export default function MenuScreen() {
               <TouchableOpacity
                 key={tag}
                 activeOpacity={0.8}
-                onPress={() => setActiveFilter(tag)}
+                onPress={() => handleFilterPress(tag)}
                 style={[
                   styles.filterChip,
                   isActive ? styles.activeFilterChip : styles.inactiveFilterChip,
                 ]}
+                accessibilityRole="button"
+                accessibilityState={{ selected: isActive }}
               >
                 <Text
                   style={[
@@ -93,6 +108,7 @@ export default function MenuScreen() {
         keyExtractor={(item) => item.id}
         numColumns={2}
         contentContainerStyle={styles.gridContent}
+        showsVerticalScrollIndicator={false}
         renderItem={({ item }) => (
           <CategoryCard
             category={item}
@@ -129,6 +145,7 @@ const styles = StyleSheet.create({
   activeFilterChip: {
     backgroundColor: colors.accent,
     borderColor: colors.accent,
+    ...shadows.accent,
   },
   inactiveFilterChip: {
     backgroundColor: colors.surfaceSecondary,
@@ -149,4 +166,3 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
 });
-

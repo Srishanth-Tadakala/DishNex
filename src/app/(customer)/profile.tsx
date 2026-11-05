@@ -58,9 +58,9 @@ export default function ProfileScreen() {
           />
           <View style={styles.userInfo}>
             <Text style={styles.userName}>{user?.fullName || 'Siddu'}</Text>
-            <Text style={styles.userEmail}>{user?.email || 'siddu@ember.luxury'}</Text>
+            <Text style={styles.userEmail}>{user?.email || 'siddu@dishnex.luxury'}</Text>
             <View style={styles.tierBadge}>
-              <Text style={styles.tierBadgeText}>EMBER BLACK MEMBER</Text>
+              <Text style={styles.tierBadgeText}>DISHNEX VIP MEMBER</Text>
             </View>
           </View>
         </View>

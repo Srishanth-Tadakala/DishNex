@@ -1,6 +1,6 @@
 // ==============================================================================
 // SCREEN 12 — SHOPPING CART (Exact Reference Screen 12 Layout)
-// Subtotal ₹797 + Taxes (5%) ₹40 = Total ₹837
+// Subtotal ₹797 + Taxes (5%) ₹40 = Total ₹837 with Tactile Bill Recalculation
 // ==============================================================================
 
 import React, { useState } from 'react';
@@ -12,9 +12,11 @@ import {
   Image,
   TouchableOpacity,
   TextInput,
+  Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import { colors } from '../../../theme/colors';
 import { radii, spacing, shadows } from '../../../theme/spacing';
 import { Header } from '../../../components/common/Header';
@@ -47,6 +49,12 @@ export default function CartScreen() {
 
   // If user visits empty cart, pre-populate with the 3 exact items from the visual reference
   const loadReferenceItems = () => {
+    try {
+      if (Platform.OS !== 'web') {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      }
+    } catch (_) {}
+
     // 1. Hyderabadi Chicken Biryani (₹299)
     const biryani = MOCK_MENU_ITEMS.find((i) => i.id === 'm-hyd-chicken-biryani')!;
     // 2. Paneer Butter Masala (₹299)
@@ -66,13 +74,28 @@ export default function CartScreen() {
       (c) => c.code.toUpperCase() === couponInput.toUpperCase().trim()
     );
     if (!coupon) {
+      try {
+        if (Platform.OS !== 'web') {
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+        }
+      } catch (_) {}
       setCouponError('Invalid promo code');
       return;
     }
     const success = applyCoupon(coupon);
     if (!success) {
+      try {
+        if (Platform.OS !== 'web') {
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+        }
+      } catch (_) {}
       setCouponError(`Min order amount is ${formatPaise(coupon.minOrderAmountPaise)}`);
     } else {
+      try {
+        if (Platform.OS !== 'web') {
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        }
+      } catch (_) {}
       setCouponInput('');
     }
   };
@@ -125,7 +148,7 @@ export default function CartScreen() {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
         >
-          {/* Cart Item Cards */}
+          {/* Cart Item Cards with Rich Surface Depth */}
           <View style={styles.itemsList}>
             {items.map((cartItem) => (
               <View key={cartItem.id} style={styles.itemCard}>
@@ -149,7 +172,7 @@ export default function CartScreen() {
                   </Text>
                 </View>
 
-                {/* Quantity Stepper */}
+                {/* Quantity Stepper with Haptics */}
                 <QuantityStepper
                   quantity={cartItem.quantity}
                   onIncrement={() =>
@@ -184,6 +207,8 @@ export default function CartScreen() {
               <TouchableOpacity
                 onPress={handleApplyCoupon}
                 activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel="Apply discount coupon"
               >
                 <Text style={styles.viewOffersText}>Apply</Text>
               </TouchableOpacity>
@@ -310,23 +335,23 @@ const styles = StyleSheet.create({
   itemDetails: {
     flex: 1,
     marginLeft: spacing.md,
-    marginRight: spacing.sm,
+    justifyContent: 'center',
   },
   itemName: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '700',
     color: colors.textPrimary,
-    marginBottom: 2,
   },
   addonText: {
     fontSize: 11,
     color: colors.textMuted,
-    marginBottom: 4,
+    marginTop: 2,
   },
   itemPrice: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '800',
     color: colors.textPrimary,
+    marginTop: 4,
   },
   couponContainer: {
     backgroundColor: colors.surface,
@@ -335,6 +360,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.borderSubtle,
     marginBottom: spacing.lg,
+    ...shadows.card,
   },
   couponRow: {
     flexDirection: 'row',
@@ -346,18 +372,17 @@ const styles = StyleSheet.create({
   couponInput: {
     flex: 1,
     color: colors.textPrimary,
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '600',
   },
   viewOffersText: {
-    color: colors.accent,
     fontSize: 13,
     fontWeight: '700',
-    marginLeft: spacing.sm,
+    color: colors.accent,
   },
   couponErrorText: {
     color: colors.error,
-    fontSize: 11,
+    fontSize: 12,
     marginTop: 6,
   },
   appliedRow: {
@@ -391,64 +416,66 @@ const styles = StyleSheet.create({
     ...shadows.card,
   },
   billTitle: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '700',
     color: colors.textPrimary,
     marginBottom: spacing.md,
+    letterSpacing: -0.2,
   },
   billRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 8,
   },
   billLabel: {
-    fontSize: 13,
+    fontSize: 14,
     color: colors.textSecondary,
   },
   billValue: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '600',
     color: colors.textPrimary,
   },
   billDivider: {
     height: 1,
     backgroundColor: colors.borderSubtle,
-    marginVertical: spacing.md,
+    marginVertical: 10,
   },
   billTotalLabel: {
     fontSize: 16,
-    fontWeight: '800',
+    fontWeight: '700',
     color: colors.textPrimary,
   },
   billTotalValue: {
-    fontSize: 17,
+    fontSize: 18,
     fontWeight: '800',
-    color: colors.accent,
+    color: colors.textPrimary,
   },
   checkoutButton: {
-    marginBottom: spacing.lg,
+    marginBottom: 20,
   },
   emptyContainer: {
     flex: 1,
-    paddingTop: 80,
     alignItems: 'center',
+    justifyContent: 'center',
     paddingHorizontal: spacing.xxl,
   },
   emptyTitle: {
     fontSize: 18,
     fontWeight: '700',
     color: colors.textPrimary,
-    marginTop: spacing.lg,
-    marginBottom: 8,
+    marginTop: spacing.md,
+    marginBottom: spacing.xs,
   },
   emptySub: {
-    fontSize: 13,
+    fontSize: 14,
     color: colors.textSecondary,
     textAlign: 'center',
-    marginBottom: spacing.xxl,
+    lineHeight: 20,
+    marginBottom: spacing.xl,
   },
   loadSampleButton: {
     marginBottom: spacing.sm,
   },
 });
-

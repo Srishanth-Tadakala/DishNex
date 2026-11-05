@@ -1,8 +1,8 @@
 // ==============================================================================
-// SCREEN 09 — FOOD DETAILS (Exact Reference Screen 9 Layout)
+// SCREEN 09 — FOOD DETAILS (Exact Reference Screen 9 Layout & Micro-Interactions)
 // ==============================================================================
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -11,9 +11,12 @@ import {
   Image,
   TouchableOpacity,
   Dimensions,
+  Animated,
+  Platform,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import { colors } from '../../../theme/colors';
 import { radii, spacing, shadows } from '../../../theme/spacing';
 import { QuantityStepper } from '../../../components/common/QuantityStepper';
@@ -37,6 +40,10 @@ export default function FoodDetailsScreen() {
   const { addItem } = useCartStore();
   const { isDishFavorite, toggleFavoriteDish } = useFavoritesStore();
 
+  // Animation values
+  const heartScale = useRef(new Animated.Value(1)).current;
+  const cartBtnScale = useRef(new Animated.Value(1)).current;
+
   useEffect(() => {
     async function loadDish() {
       const targetId = id || 'm-hyd-chicken-biryani';
@@ -58,7 +65,37 @@ export default function FoodDetailsScreen() {
 
   const isFav = isDishFavorite(dish.id);
 
+  const handleFavoritePress = () => {
+    try {
+      if (Platform.OS !== 'web') {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      }
+    } catch (_) {}
+
+    Animated.sequence([
+      Animated.timing(heartScale, {
+        toValue: 1.4,
+        duration: 120,
+        useNativeDriver: true,
+      }),
+      Animated.spring(heartScale, {
+        toValue: 1,
+        friction: 3,
+        tension: 40,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    toggleFavoriteDish(dish);
+  };
+
   const toggleAddon = (addon: MenuItemAddon) => {
+    try {
+      if (Platform.OS !== 'web') {
+        Haptics.selectionAsync();
+      }
+    } catch (_) {}
+
     if (selectedAddons.some((a) => a.id === addon.id)) {
       setSelectedAddons(selectedAddons.filter((a) => a.id !== addon.id));
     } else {
@@ -71,13 +108,36 @@ export default function FoodDetailsScreen() {
   const totalPricePaise = unitPricePaise * quantity;
 
   const handleAddToCart = () => {
+    try {
+      if (Platform.OS !== 'web') {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      }
+    } catch (_) {}
+
+    Animated.sequence([
+      Animated.timing(cartBtnScale, {
+        toValue: 0.94,
+        duration: 90,
+        useNativeDriver: true,
+      }),
+      Animated.spring(cartBtnScale, {
+        toValue: 1,
+        friction: 3,
+        tension: 40,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
     addItem(dish, selectedAddons, quantity);
     router.push('/(customer)/(tabs)/cart');
   };
 
   return (
     <View style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scroll}
+      >
         {/* 1. Hero Image Container */}
         <View style={styles.heroContainer}>
           <Image
@@ -91,6 +151,8 @@ export default function FoodDetailsScreen() {
             style={styles.floatingBackButton}
             onPress={() => router.back()}
             activeOpacity={0.8}
+            accessibilityRole="button"
+            accessibilityLabel="Go back"
           >
             <Ionicons name="arrow-back" size={20} color={colors.textPrimary} />
           </TouchableOpacity>
@@ -98,28 +160,37 @@ export default function FoodDetailsScreen() {
           {/* Floating Favorite Button */}
           <TouchableOpacity
             style={styles.floatingFavButton}
-            onPress={() => toggleFavoriteDish(dish)}
+            onPress={handleFavoritePress}
             activeOpacity={0.8}
+            accessibilityRole="button"
+            accessibilityLabel={isFav ? 'Remove from favorites' : 'Add to favorites'}
           >
-            <Ionicons
-              name={isFav ? 'heart' : 'heart-outline'}
-              size={22}
-              color={isFav ? '#E53935' : colors.textPrimary}
-            />
+            <Animated.View style={{ transform: [{ scale: heartScale }] }}>
+              <Ionicons
+                name={isFav ? 'heart' : 'heart-outline'}
+                size={22}
+                color={isFav ? '#FF4D4D' : colors.textPrimary}
+              />
+            </Animated.View>
           </TouchableOpacity>
         </View>
 
-        {/* 2. Content Card Sheet */}
+        {/* 2. Content Card Sheet (Tactile Ivory Background) */}
         <View style={styles.contentCard}>
           {/* Title Row with Heart */}
           <View style={styles.titleRow}>
             <Text style={styles.dishTitle}>{dish.name}</Text>
-            <TouchableOpacity onPress={() => toggleFavoriteDish(dish)}>
-              <Ionicons
-                name={isFav ? 'heart' : 'heart-outline'}
-                size={24}
-                color={isFav ? '#E53935' : colors.textSecondary}
-              />
+            <TouchableOpacity
+              onPress={handleFavoritePress}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            >
+              <Animated.View style={{ transform: [{ scale: heartScale }] }}>
+                <Ionicons
+                  name={isFav ? 'heart' : 'heart-outline'}
+                  size={24}
+                  color={isFav ? '#FF4D4D' : '#91A397'}
+                />
+              </Animated.View>
             </TouchableOpacity>
           </View>
 
@@ -130,14 +201,14 @@ export default function FoodDetailsScreen() {
               reviewsCount={dish.reviewsCount}
               size="medium"
               showCountText={true}
-              textColor="#10271D"
+              textColor="#071A14"
             />
           </View>
 
           {/* Description */}
           <Text style={styles.description}>{dish.description}</Text>
 
-          {/* 3 Metric Badges */}
+          {/* 3 Metric Badges: Spicy | Serves | Calories */}
           <View style={styles.badgesRow}>
             {/* Spicy Level */}
             <View style={styles.badgeCard}>
@@ -187,6 +258,8 @@ export default function FoodDetailsScreen() {
                     activeOpacity={0.8}
                     onPress={() => toggleAddon(addon)}
                     style={styles.addonItem}
+                    accessibilityRole="checkbox"
+                    accessibilityState={{ checked: isSelected }}
                   >
                     <View style={styles.addonLeft}>
                       <View
@@ -216,7 +289,7 @@ export default function FoodDetailsScreen() {
         </View>
       </ScrollView>
 
-      {/* 3. Bottom Sticky Action Bar */}
+      {/* 3. Bottom Sticky Action Bar with Animated Price & Stepper */}
       <View style={styles.bottomBar}>
         {/* Quantity Stepper */}
         <QuantityStepper
@@ -227,15 +300,19 @@ export default function FoodDetailsScreen() {
         />
 
         {/* Add to Cart Button with Dynamic Total */}
-        <TouchableOpacity
-          activeOpacity={0.85}
-          onPress={handleAddToCart}
-          style={styles.addToCartButton}
-        >
-          <Text style={styles.addToCartText}>
-            Add to Cart   {formatPaise(totalPricePaise)}
-          </Text>
-        </TouchableOpacity>
+        <Animated.View style={{ flex: 1, transform: [{ scale: cartBtnScale }] }}>
+          <TouchableOpacity
+            activeOpacity={0.85}
+            onPress={handleAddToCart}
+            style={styles.addToCartButton}
+            accessibilityRole="button"
+            accessibilityLabel={`Add to Cart, total ${formatPaise(totalPricePaise)}`}
+          >
+            <Text style={styles.addToCartText}>
+              Add to Cart   {formatPaise(totalPricePaise)}
+            </Text>
+          </TouchableOpacity>
+        </Animated.View>
       </View>
     </View>
   );
@@ -275,9 +352,10 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(6, 19, 15, 0.65)',
+    backgroundColor: 'rgba(7, 26, 20, 0.70)',
     alignItems: 'center',
     justifyContent: 'center',
+    ...shadows.card,
   },
   floatingFavButton: {
     position: 'absolute',
@@ -286,31 +364,33 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(6, 19, 15, 0.65)',
+    backgroundColor: 'rgba(7, 26, 20, 0.70)',
     alignItems: 'center',
     justifyContent: 'center',
+    ...shadows.card,
   },
   contentCard: {
     marginTop: -28,
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
-    backgroundColor: '#F4F0E7',
+    backgroundColor: '#FFF8EA',
     paddingHorizontal: spacing.xxl,
     paddingTop: spacing.xxl,
     borderWidth: 1,
     borderColor: 'rgba(0, 0, 0, 0.05)',
+    ...shadows.cardElevated,
   },
   titleRow: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: spacing.xs,
+    alignItems: 'center',
+    marginBottom: 4,
   },
   dishTitle: {
     fontFamily: 'serif',
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: '700',
-    color: '#10271D',
+    color: '#071A14',
     flex: 1,
     paddingRight: spacing.md,
   },
@@ -319,53 +399,54 @@ const styles = StyleSheet.create({
   },
   description: {
     fontSize: 14,
-    color: '#355344',
+    color: '#4A5B50',
     lineHeight: 22,
     marginBottom: spacing.xl,
   },
   badgesRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: spacing.xxl,
-    gap: spacing.md,
+    marginBottom: spacing.xl,
+    gap: spacing.sm,
   },
   badgeCard: {
     flex: 1,
-    backgroundColor: '#EDE8DD',
-    borderRadius: radii.xl,
-    paddingVertical: spacing.md,
+    backgroundColor: '#0B2118',
+    borderRadius: radii.lg,
+    paddingVertical: 12,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(0, 0, 0, 0.06)',
+    borderColor: colors.borderSubtle,
+    ...shadows.card,
   },
   badgeLabel: {
     fontSize: 11,
-    color: '#55695E',
+    color: colors.textSecondary,
     marginTop: 4,
   },
   badgeValue: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '700',
-    color: '#10271D',
+    color: colors.textPrimary,
     marginTop: 2,
   },
   addonsSection: {
-    marginTop: spacing.sm,
-    paddingTop: spacing.lg,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(0, 0, 0, 0.08)',
+    marginTop: spacing.md,
+    marginBottom: spacing.xxxl,
   },
   addonsSectionTitle: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#10271D',
+    color: '#071A14',
     marginBottom: spacing.md,
   },
   addonItem: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: spacing.md,
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0, 0, 0, 0.06)',
   },
   addonLeft: {
     flexDirection: 'row',
@@ -387,43 +468,42 @@ const styles = StyleSheet.create({
   },
   addonName: {
     fontSize: 14,
-    color: '#10271D',
+    color: '#071A14',
+    fontWeight: '500',
   },
   addonPrice: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#244D3A',
+    color: '#071A14',
   },
   bottomBar: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: '#F4F0E7',
+    backgroundColor: colors.backgroundSecondary,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(0, 0, 0, 0.08)',
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.md,
-    paddingBottom: 28,
+    borderTopColor: colors.borderSubtle,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    gap: spacing.md,
     ...shadows.bottomBar,
   },
   addToCartButton: {
-    flex: 1,
-    marginLeft: spacing.lg,
     backgroundColor: colors.accent,
     borderRadius: radii.full,
     paddingVertical: 14,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.25)',
     ...shadows.accent,
   },
   addToCartText: {
     fontSize: 15,
-    fontWeight: '800',
+    fontWeight: '700',
     color: colors.textDark,
   },
 });
-

@@ -1,5 +1,5 @@
 // ==============================================================================
-// EMBER AUTHENTICATION STORE (Zustand + AsyncStorage Persistence)
+// DISHNEX AUTHENTICATION STORE (Zustand + AsyncStorage Persistence)
 // Handles Supabase session, user profile, and role-protected staff mode
 // ==============================================================================
 
@@ -24,7 +24,7 @@ interface AuthState {
 
 const DEFAULT_USER: UserProfile = {
   id: 'user-siddu-01',
-  email: 'siddu@ember.luxury',
+  email: 'siddu@dishnex.luxury',
   fullName: 'Siddu',
   phoneNumber: '+91 98765 43210',
   avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&q=80',

@@ -1,5 +1,5 @@
 // ==============================================================================
-// SCREEN 10 — SEARCH (Exact Reference Screen 10 Layout)
+// SCREEN 10 — SEARCH (Exact Reference Screen 10 Layout & Instant Querying)
 // ==============================================================================
 
 import React, { useEffect, useState } from 'react';
@@ -10,11 +10,13 @@ import {
   TouchableOpacity,
   StyleSheet,
   FlatList,
+  Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import { colors } from '../../theme/colors';
-import { radii, spacing } from '../../theme/spacing';
+import { radii, spacing, shadows } from '../../theme/spacing';
 import { FoodCard } from '../../components/cards/FoodCard';
 import { api } from '../../services/api';
 import { MenuItem } from '../../types';
@@ -30,6 +32,7 @@ export default function SearchScreen() {
   const [query, setQuery] = useState('Biryani');
   const [activeFilter, setActiveFilter] = useState<'all' | 'dishes' | 'categories'>('all');
   const [results, setResults] = useState<MenuItem[]>([]);
+  const [isFocused, setIsFocused] = useState(false);
 
   useEffect(() => {
     async function executeSearch() {
@@ -39,6 +42,26 @@ export default function SearchScreen() {
     executeSearch();
   }, [query, activeFilter]);
 
+  const handleClear = () => {
+    try {
+      if (Platform.OS !== 'web') {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      }
+    } catch (_) {}
+    setQuery('');
+  };
+
+  const handleFilterSelect = (key: 'all' | 'dishes' | 'categories') => {
+    if (key !== activeFilter) {
+      try {
+        if (Platform.OS !== 'web') {
+          Haptics.selectionAsync();
+        }
+      } catch (_) {}
+      setActiveFilter(key);
+    }
+  };
+
   return (
     <View style={styles.container}>
       {/* 1. Top Search Header with Back & Clear */}
@@ -47,15 +70,22 @@ export default function SearchScreen() {
           onPress={() => router.back()}
           activeOpacity={0.7}
           style={styles.backButton}
+          accessibilityRole="button"
+          accessibilityLabel="Go back"
         >
           <Ionicons name="arrow-back" size={22} color={colors.textPrimary} />
         </TouchableOpacity>
 
-        <View style={styles.searchBox}>
+        <View
+          style={[
+            styles.searchBox,
+            isFocused && styles.searchBoxFocused,
+          ]}
+        >
           <Ionicons
             name="search-outline"
             size={18}
-            color={colors.textSecondary}
+            color={isFocused ? colors.accent : colors.textSecondary}
             style={styles.searchIcon}
           />
           <TextInput
@@ -64,12 +94,16 @@ export default function SearchScreen() {
             style={styles.searchInput}
             value={query}
             onChangeText={setQuery}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
             autoFocus={false}
           />
           {query.length > 0 && (
             <TouchableOpacity
-              onPress={() => setQuery('')}
+              onPress={handleClear}
               hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              accessibilityRole="button"
+              accessibilityLabel="Clear search input"
             >
               <Ionicons
                 name="close-circle"
@@ -89,11 +123,13 @@ export default function SearchScreen() {
             <TouchableOpacity
               key={f.key}
               activeOpacity={0.8}
-              onPress={() => setActiveFilter(f.key as any)}
+              onPress={() => handleFilterSelect(f.key as any)}
               style={[
                 styles.filterChip,
                 isActive ? styles.activeFilterChip : styles.inactiveFilterChip,
               ]}
+              accessibilityRole="button"
+              accessibilityState={{ selected: isActive }}
             >
               <Text
                 style={[
@@ -122,6 +158,7 @@ export default function SearchScreen() {
         data={results}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={false}
         renderItem={({ item }) => (
           <FoodCard
             item={item}
@@ -166,6 +203,11 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderWidth: 1,
     borderColor: colors.borderSubtle,
+    ...shadows.card,
+  },
+  searchBoxFocused: {
+    borderColor: colors.accent,
+    backgroundColor: colors.surfaceSecondary,
   },
   searchIcon: {
     marginRight: 6,
@@ -190,6 +232,7 @@ const styles = StyleSheet.create({
   activeFilterChip: {
     backgroundColor: colors.accent,
     borderColor: colors.accent,
+    ...shadows.accent,
   },
   inactiveFilterChip: {
     backgroundColor: colors.surfaceSecondary,
@@ -233,4 +276,3 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
   },
 });
-

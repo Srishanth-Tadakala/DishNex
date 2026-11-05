@@ -1,5 +1,5 @@
 // ==============================================================================
-// EMBER DESIGN SYSTEM — SPACING & RADII
+// DISHNEX DESIGN SYSTEM — SPACING, RADII & ELEVATED SHADOWS
 // ==============================================================================
 
 export const spacing = {
@@ -30,16 +30,30 @@ export const shadows = {
   card: {
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
+    shadowOpacity: 0.40,
     shadowRadius: 10,
     elevation: 5,
   },
+  cardElevated: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.50,
+    shadowRadius: 14,
+    elevation: 8,
+  },
   accent: {
-    shadowColor: '#D8F06B',
+    shadowColor: '#DFFF63',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.35,
     shadowRadius: 12,
     elevation: 6,
+  },
+  emeraldGlow: {
+    shadowColor: '#48C783',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    elevation: 4,
   },
   bottomBar: {
     shadowColor: '#000',
@@ -49,4 +63,3 @@ export const shadows = {
     elevation: 10,
   },
 } as const;
-

@@ -83,7 +83,7 @@ export default function StaffDashboardScreen() {
         {/* Branch Identifier Badge */}
         <View style={styles.branchCard}>
           <View>
-            <Text style={styles.branchName}>EMBER Flagship — Rajkot</Text>
+            <Text style={styles.branchName}>DishNex Flagship — Rajkot</Text>
             <Text style={styles.staffRoleText}>
               Logged in as {user?.fullName} ({user?.role.toUpperCase()})
             </Text>

@@ -1,23 +1,26 @@
 // ==============================================================================
-// SCREEN 14 — ORDER CONFIRMATION (Exact Reference Screen 14 Layout)
+// SCREEN 14 — ORDER CONFIRMATION (DishNex Luxury Celebration & State Animations)
 // Headline: Order Placed Successfully! 🎉
-// Info Card: Order ID #EM683721 | Estimated Delivery 30-40 mins
+// Info Card: Order ID #EMB83721 | Estimated Delivery 30-40 mins
 // Actions: Track Order (Primary Lime) | Back to Home
 // ==============================================================================
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   Dimensions,
+  Animated,
+  Platform,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import { colors } from '../../theme/colors';
 import { radii, spacing, shadows } from '../../theme/spacing';
-import { EmberFlameLogo } from '../../components/common/EmberFlameLogo';
+import { DishNexFlameLogo } from '../../components/common/EmberFlameLogo';
 import { Button } from '../../components/common/Button';
 
 const { width } = Dimensions.get('window');
@@ -30,8 +33,67 @@ export default function OrderConfirmationScreen() {
     estimatedTime?: string;
   }>();
 
-  const displayOrderNumber = orderNumber || '#EM683721';
+  const displayOrderNumber = orderNumber || '#EMB83721';
   const displayEstimatedTime = estimatedTime || '30 - 40 mins';
+
+  // Animation values
+  const clocheScale = useRef(new Animated.Value(0.6)).current;
+  const clocheOpacity = useRef(new Animated.Value(0)).current;
+  const checkScale = useRef(new Animated.Value(0)).current;
+  const cardSlide = useRef(new Animated.Value(20)).current;
+  const cardOpacity = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    try {
+      if (Platform.OS !== 'web') {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      }
+    } catch (_) {}
+
+    // 1. Cloche dome spring reveal
+    Animated.parallel([
+      Animated.timing(clocheOpacity, {
+        toValue: 1,
+        duration: 400,
+        useNativeDriver: true,
+      }),
+      Animated.spring(clocheScale, {
+        toValue: 1,
+        friction: 5,
+        tension: 40,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    // 2. Checkmark badge pop
+    Animated.sequence([
+      Animated.delay(300),
+      Animated.spring(checkScale, {
+        toValue: 1,
+        friction: 4,
+        tension: 50,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    // 3. Card slide-up reveal
+    Animated.sequence([
+      Animated.delay(450),
+      Animated.parallel([
+        Animated.timing(cardOpacity, {
+          toValue: 1,
+          duration: 350,
+          useNativeDriver: true,
+        }),
+        Animated.spring(cardSlide, {
+          toValue: 0,
+          friction: 6,
+          tension: 40,
+          useNativeDriver: true,
+        }),
+      ]),
+    ]).start();
+  }, []);
 
   const handleTrackOrder = () => {
     router.push({
@@ -46,24 +108,43 @@ export default function OrderConfirmationScreen() {
 
   return (
     <View style={styles.container}>
-      {/* 1. Top EMBER Flame Branding */}
+      {/* 1. Top DishNex Flame Branding */}
       <View style={styles.topBrand}>
-        <EmberFlameLogo size="medium" showTagline={false} />
+        <DishNexFlameLogo size="medium" showTagline={false} />
       </View>
 
-      {/* 2. Cloche Illustration with Green Checkmark */}
+      {/* 2. Cloche Illustration with Animated Green Checkmark & Confetti Accents */}
       <View style={styles.illustrationContainer}>
-        <View style={styles.clocheCircle}>
+        {/* Subtle celebratory ambient sparkle dots */}
+        <View style={[styles.sparkleDot, { top: -8, left: 16 }]} />
+        <View style={[styles.sparkleDot, { top: 12, right: 10, width: 6, height: 6 }]} />
+        <View style={[styles.sparkleDot, { bottom: 20, left: -6, width: 5, height: 5 }]} />
+        <View style={[styles.sparkleDot, { bottom: 8, right: 18, width: 7, height: 7 }]} />
+
+        <Animated.View
+          style={[
+            styles.clocheCircle,
+            {
+              opacity: clocheOpacity,
+              transform: [{ scale: clocheScale }],
+            },
+          ]}
+        >
           <MaterialCommunityIcons
             name="room-service"
             size={76}
             color={colors.accent}
           />
-          {/* Green checkmark badge */}
-          <View style={styles.checkBadge}>
+          {/* Green checkmark badge with pop animation */}
+          <Animated.View
+            style={[
+              styles.checkBadge,
+              { transform: [{ scale: checkScale }] },
+            ]}
+          >
             <Ionicons name="checkmark" size={24} color={colors.textDark} />
-          </View>
-        </View>
+          </Animated.View>
+        </Animated.View>
       </View>
 
       {/* 3. Success Headline & Subtitle */}
@@ -74,8 +155,16 @@ export default function OrderConfirmationScreen() {
         </Text>
       </View>
 
-      {/* 4. Order ID & Estimated Delivery Info Card */}
-      <View style={styles.infoCard}>
+      {/* 4. Order ID & Estimated Delivery Info Card with Slide-Up Entrance */}
+      <Animated.View
+        style={[
+          styles.infoCard,
+          {
+            opacity: cardOpacity,
+            transform: [{ translateY: cardSlide }],
+          },
+        ]}
+      >
         <View style={styles.infoColLeft}>
           <Text style={styles.infoLabel}>Order ID</Text>
           <Text style={styles.infoValueLeft}>{displayOrderNumber}</Text>
@@ -87,7 +176,7 @@ export default function OrderConfirmationScreen() {
           <Text style={styles.infoLabel}>Estimated Delivery</Text>
           <Text style={styles.infoValueRight}>{displayEstimatedTime}</Text>
         </View>
-      </View>
+      </Animated.View>
 
       {/* 5. Bottom Actions (Track Order & Back to Home) */}
       <View style={styles.actionsContainer}>
@@ -101,6 +190,8 @@ export default function OrderConfirmationScreen() {
           onPress={handleBackToHome}
           activeOpacity={0.7}
           style={styles.homeButton}
+          accessibilityRole="button"
+          accessibilityLabel="Back to Home"
         >
           <Text style={styles.homeButtonText}>Back to Home</Text>
         </TouchableOpacity>
@@ -126,6 +217,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginVertical: spacing.lg,
+    position: 'relative',
+  },
+  sparkleDot: {
+    position: 'absolute',
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: colors.accent,
+    opacity: 0.7,
   },
   clocheCircle: {
     width: 140,
@@ -137,7 +237,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     position: 'relative',
-    ...shadows.card,
+    ...shadows.cardElevated,
   },
   checkBadge: {
     position: 'absolute',
@@ -151,6 +251,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderWidth: 3,
     borderColor: colors.background,
+    ...shadows.accent,
   },
   textContainer: {
     alignItems: 'center',
@@ -230,4 +331,3 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
   },
 });
-

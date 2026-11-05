@@ -29,7 +29,7 @@ export default function SupportScreen() {
       a: 'Yes, each dish detail page features customizable spice levels and add-ons such as extra cuts, gravies, and accompaniments.',
     },
     {
-      q: 'What payment modes does EMBER accept?',
+      q: 'What payment modes does DishNex accept?',
       a: 'We accept UPI (Google Pay, PhonePe, Paytm), Credit/Debit cards, Net Banking, and Cash on Delivery.',
     },
   ];
@@ -58,7 +58,7 @@ export default function SupportScreen() {
           <TouchableOpacity style={styles.contactCard} activeOpacity={0.8}>
             <Ionicons name="mail-outline" size={24} color={colors.accent} />
             <Text style={styles.contactTitle}>Concierge Email</Text>
-            <Text style={styles.contactSub}>vip@ember.luxury</Text>
+            <Text style={styles.contactSub}>vip@dishnex.luxury</Text>
           </TouchableOpacity>
         </View>
 

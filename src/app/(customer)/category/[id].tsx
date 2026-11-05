@@ -1,5 +1,5 @@
 // ==============================================================================
-// SCREEN 08 — CATEGORY MENU LIST (Biryani)
+// SCREEN 08 — CATEGORY MENU LIST (Biryani / Luxury Gastronomy)
 // ==============================================================================
 
 import React, { useEffect, useState } from 'react';
@@ -7,13 +7,14 @@ import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
   TouchableOpacity,
   FlatList,
+  Platform,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import * as Haptics from 'expo-haptics';
 import { colors } from '../../../theme/colors';
-import { radii, spacing } from '../../../theme/spacing';
+import { radii, spacing, shadows } from '../../../theme/spacing';
 import { Header } from '../../../components/common/Header';
 import { FoodCard } from '../../../components/cards/FoodCard';
 import { api } from '../../../services/api';
@@ -47,6 +48,17 @@ export default function CategoryMenuScreen() {
     fetchItems();
   }, [id, activeDietary]);
 
+  const handleFilterPress = (key: string) => {
+    if (key !== activeDietary) {
+      try {
+        if (Platform.OS !== 'web') {
+          Haptics.selectionAsync();
+        }
+      } catch (_) {}
+      setActiveDietary(key);
+    }
+  };
+
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -66,11 +78,13 @@ export default function CategoryMenuScreen() {
               <TouchableOpacity
                 key={f.key}
                 activeOpacity={0.8}
-                onPress={() => setActiveDietary(f.key)}
+                onPress={() => handleFilterPress(f.key)}
                 style={[
                   styles.filterChip,
                   isActive ? styles.activeFilterChip : styles.inactiveFilterChip,
                 ]}
+                accessibilityRole="button"
+                accessibilityState={{ selected: isActive }}
               >
                 <Text
                   style={[
@@ -88,11 +102,12 @@ export default function CategoryMenuScreen() {
         </View>
       </View>
 
-      {/* Food Cards List */}
+      {/* Food Cards List with Tactile Ivory Surface & Micro-Interactions */}
       <FlatList
         data={items}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={false}
         renderItem={({ item }) => (
           <FoodCard
             item={item}
@@ -115,8 +130,8 @@ const styles = StyleSheet.create({
     height: 96,
   },
   filtersContainer: {
+    marginVertical: spacing.sm,
     paddingHorizontal: spacing.lg,
-    marginBottom: spacing.md,
   },
   filtersRow: {
     flexDirection: 'row',
@@ -131,6 +146,7 @@ const styles = StyleSheet.create({
   activeFilterChip: {
     backgroundColor: colors.accent,
     borderColor: colors.accent,
+    ...shadows.accent,
   },
   inactiveFilterChip: {
     backgroundColor: colors.surfaceSecondary,
@@ -151,4 +167,3 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
 });
-

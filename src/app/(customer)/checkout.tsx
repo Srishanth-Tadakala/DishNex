@@ -1,5 +1,5 @@
 // ==============================================================================
-// SCREEN 13 — CHECKOUT (Exact Reference Screen 13 Layout)
+// SCREEN 13 — CHECKOUT (Exact Reference Screen 13 Layout & Fluid Stepper)
 // Stepper: Address -> Payment -> Confirm
 // Delivery Address: Marwadi University, Rajkot, Gujarat - 360003
 // ==============================================================================
@@ -11,9 +11,11 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import { colors } from '../../theme/colors';
 import { radii, spacing, shadows } from '../../theme/spacing';
 import { Header } from '../../components/common/Header';
@@ -33,7 +35,6 @@ export default function CheckoutScreen() {
     orderType,
     setOrderType,
     tableIdentifier,
-    setTableIdentifier,
     specialInstructions,
     getSubtotalPaise,
     getTaxPaise,
@@ -60,6 +61,24 @@ export default function CheckoutScreen() {
 
   const totalPaise = getTotalPaise();
 
+  const handleTypeSelect = (type: OrderType) => {
+    try {
+      if (Platform.OS !== 'web') {
+        Haptics.selectionAsync();
+      }
+    } catch (_) {}
+    setOrderType(type);
+  };
+
+  const handlePaymentSelect = (method: PaymentMethod) => {
+    try {
+      if (Platform.OS !== 'web') {
+        Haptics.selectionAsync();
+      }
+    } catch (_) {}
+    setPaymentMethod(method);
+  };
+
   const handlePlaceOrder = async () => {
     if (items.length === 0) {
       alert('Your cart is empty. Please add items before checking out.');
@@ -69,6 +88,12 @@ export default function CheckoutScreen() {
 
     setIsProcessing(true);
     try {
+      try {
+        if (Platform.OS !== 'web') {
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        }
+      } catch (_) {}
+
       const idempotencyKey = `ord_idem_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 
       // 1. Payment Initialization / Session via Razorpay service boundary
@@ -77,7 +102,7 @@ export default function CheckoutScreen() {
         orderNumber: '#EM_DRAFT',
         amountPaise: totalPaise,
         customerName: user?.fullName || 'Siddu',
-        customerEmail: user?.email || 'siddu@ember.luxury',
+        customerEmail: user?.email || 'siddu@dishnex.luxury',
         customerPhone: user?.phoneNumber || '+91 98765 43210',
       });
 
@@ -167,23 +192,27 @@ export default function CheckoutScreen() {
         </View>
 
         {/* 2. Delivery Address Card (Marwadi University, Rajkot, Gujarat - 360003) */}
-        <View style={styles.sectionCard}>
+        <View style={styles.sectionCardIvory}>
           <View style={styles.cardHeader}>
-            <Text style={styles.cardHeaderTitle}>Delivery Address</Text>
-            <TouchableOpacity onPress={() => router.push('/(customer)/addresses')}>
+            <Text style={styles.cardHeaderTitleDark}>Delivery Address</Text>
+            <TouchableOpacity
+              onPress={() => router.push('/(customer)/addresses')}
+              accessibilityRole="button"
+              accessibilityLabel="Change delivery address"
+            >
               <Text style={styles.changeLink}>Change</Text>
             </TouchableOpacity>
           </View>
 
           <View style={styles.addressRow}>
-            <View style={styles.iconCircle}>
-              <Ionicons name="home-outline" size={20} color={colors.accent} />
+            <View style={styles.iconCircleIvory}>
+              <Ionicons name="home-outline" size={20} color={colors.textDark} />
             </View>
             <View style={styles.addressDetails}>
-              <Text style={styles.addressLabel}>
+              <Text style={styles.addressLabelDark}>
                 {selectedAddress?.label || 'Home'}
               </Text>
-              <Text style={styles.addressText} numberOfLines={2}>
+              <Text style={styles.addressTextDark} numberOfLines={2}>
                 {selectedAddress?.streetAddress ||
                   'Marwadi University, Rajkot, Gujarat - 360003'}
               </Text>
@@ -198,11 +227,13 @@ export default function CheckoutScreen() {
             {/* Dine In */}
             <TouchableOpacity
               activeOpacity={0.8}
-              onPress={() => setOrderType('dine_in')}
+              onPress={() => handleTypeSelect('dine_in')}
               style={[
                 styles.typeButton,
                 orderType === 'dine_in' && styles.typeButtonActive,
               ]}
+              accessibilityRole="button"
+              accessibilityState={{ selected: orderType === 'dine_in' }}
             >
               <MaterialCommunityIcons
                 name="silverware-fork-knife"
@@ -224,11 +255,13 @@ export default function CheckoutScreen() {
             {/* Takeaway */}
             <TouchableOpacity
               activeOpacity={0.8}
-              onPress={() => setOrderType('takeaway')}
+              onPress={() => handleTypeSelect('takeaway')}
               style={[
                 styles.typeButton,
                 orderType === 'takeaway' && styles.typeButtonActive,
               ]}
+              accessibilityRole="button"
+              accessibilityState={{ selected: orderType === 'takeaway' }}
             >
               <MaterialCommunityIcons
                 name="shopping-outline"
@@ -250,11 +283,13 @@ export default function CheckoutScreen() {
             {/* Delivery */}
             <TouchableOpacity
               activeOpacity={0.8}
-              onPress={() => setOrderType('delivery')}
+              onPress={() => handleTypeSelect('delivery')}
               style={[
                 styles.typeButton,
                 orderType === 'delivery' && styles.typeButtonActive,
               ]}
+              accessibilityRole="button"
+              accessibilityState={{ selected: orderType === 'delivery' }}
             >
               <MaterialCommunityIcons
                 name="moped"
@@ -280,7 +315,7 @@ export default function CheckoutScreen() {
           <View style={styles.cardHeader}>
             <Text style={styles.cardHeaderTitle}>Delivery Time</Text>
             <TouchableOpacity>
-              <Text style={styles.changeLink}>Schedule</Text>
+              <Text style={styles.scheduleLink}>Schedule</Text>
             </TouchableOpacity>
           </View>
 
@@ -302,7 +337,7 @@ export default function CheckoutScreen() {
           {/* UPI */}
           <TouchableOpacity
             activeOpacity={0.8}
-            onPress={() => setPaymentMethod('upi')}
+            onPress={() => handlePaymentSelect('upi')}
             style={[
               styles.paymentOption,
               paymentMethod === 'upi' && styles.paymentOptionActive,
@@ -335,7 +370,7 @@ export default function CheckoutScreen() {
           {/* Cards */}
           <TouchableOpacity
             activeOpacity={0.8}
-            onPress={() => setPaymentMethod('card')}
+            onPress={() => handlePaymentSelect('card')}
             style={[
               styles.paymentOption,
               paymentMethod === 'card' && styles.paymentOptionActive,
@@ -366,7 +401,7 @@ export default function CheckoutScreen() {
           {/* Cash on Delivery (COD) */}
           <TouchableOpacity
             activeOpacity={0.8}
-            onPress={() => setPaymentMethod('cod')}
+            onPress={() => handlePaymentSelect('cod')}
             style={[
               styles.paymentOption,
               paymentMethod === 'cod' && styles.paymentOptionActive,
@@ -444,6 +479,7 @@ const styles = StyleSheet.create({
   stepActive: {
     backgroundColor: colors.accent,
     borderColor: colors.accent,
+    ...shadows.accent,
   },
   stepNumber: {
     fontSize: 11,
@@ -458,15 +494,15 @@ const styles = StyleSheet.create({
   stepLabel: {
     fontSize: 11,
     color: colors.textMuted,
+    fontWeight: '600',
   },
   stepLabelActive: {
     color: colors.textPrimary,
-    fontWeight: '700',
   },
   stepLine: {
-    flex: 1,
+    width: 60,
     height: 2,
-    backgroundColor: colors.surfaceSecondary,
+    backgroundColor: colors.borderSubtle,
     marginHorizontal: 8,
     marginBottom: 16,
   },
@@ -474,13 +510,22 @@ const styles = StyleSheet.create({
     backgroundColor: colors.accent,
   },
   sectionCard: {
-    backgroundColor: '#F4F0E7',
+    backgroundColor: colors.surface,
     borderRadius: radii.xl,
     padding: spacing.lg,
     borderWidth: 1,
-    borderColor: 'rgba(0, 0, 0, 0.05)',
+    borderColor: colors.borderSubtle,
     marginBottom: spacing.lg,
     ...shadows.card,
+  },
+  sectionCardIvory: {
+    backgroundColor: '#FFF8EA',
+    borderRadius: radii.xl,
+    padding: spacing.lg,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 0, 0, 0.06)',
+    marginBottom: spacing.lg,
+    ...shadows.cardElevated,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -491,13 +536,23 @@ const styles = StyleSheet.create({
   cardHeaderTitle: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#10271D',
-    marginBottom: spacing.sm,
+    color: colors.textPrimary,
+    marginBottom: spacing.md,
+  },
+  cardHeaderTitleDark: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#071A14',
   },
   changeLink: {
     fontSize: 13,
     fontWeight: '700',
-    color: '#244D3A',
+    color: '#24563B',
+  },
+  scheduleLink: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: colors.accent,
   },
   addressRow: {
     flexDirection: 'row',
@@ -507,7 +562,18 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#EDE8DD',
+    backgroundColor: colors.surfaceSecondary,
+    borderWidth: 1,
+    borderColor: colors.borderSubtle,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: spacing.md,
+  },
+  iconCircleIvory: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#EFE9DC',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: spacing.md,
@@ -518,38 +584,49 @@ const styles = StyleSheet.create({
   addressLabel: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#10271D',
-    marginBottom: 2,
+    color: colors.textPrimary,
+  },
+  addressLabelDark: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#071A14',
   },
   addressText: {
     fontSize: 12,
-    color: '#355344',
+    color: colors.textSecondary,
+    marginTop: 2,
+    lineHeight: 18,
+  },
+  addressTextDark: {
+    fontSize: 12,
+    color: '#4A5B50',
+    marginTop: 2,
     lineHeight: 18,
   },
   typeSelectorRow: {
     flexDirection: 'row',
     gap: spacing.sm,
-    marginTop: spacing.xs,
   },
   typeButton: {
     flex: 1,
-    backgroundColor: '#EDE8DD',
+    backgroundColor: colors.surfaceSecondary,
     borderRadius: radii.lg,
-    paddingVertical: spacing.md,
+    paddingVertical: 12,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(0, 0, 0, 0.05)',
+    borderColor: colors.borderSubtle,
   },
   typeButtonActive: {
     backgroundColor: colors.accent,
     borderColor: colors.accent,
+    ...shadows.accent,
   },
   typeButtonText: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#55695E',
-    marginTop: 6,
+    color: colors.textSecondary,
+    marginTop: 4,
   },
   typeButtonTextActive: {
     color: colors.textDark,
@@ -558,28 +635,33 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0, 0, 0, 0.08)',
+    backgroundColor: colors.surfaceSecondary,
+    borderRadius: radii.lg,
+    padding: spacing.md,
+    marginBottom: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.borderSubtle,
   },
-  paymentOptionActive: {},
+  paymentOptionActive: {
+    borderColor: colors.accent,
+    backgroundColor: colors.surfaceElevated,
+  },
   paymentLeft: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   paymentTitle: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#10271D',
+    fontWeight: '700',
+    color: colors.textPrimary,
   },
   paymentSub: {
     fontSize: 11,
-    color: '#55695E',
+    color: colors.textMuted,
     marginTop: 2,
   },
   payButton: {
     marginTop: spacing.md,
-    marginBottom: spacing.xl,
+    marginBottom: 40,
   },
 });
-

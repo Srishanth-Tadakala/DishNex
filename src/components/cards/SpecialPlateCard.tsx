@@ -1,10 +1,20 @@
 // ==============================================================================
-// EMBER TODAY'S SPECIAL HERO CARD (Exact Reference Screen 6 Layout)
+// DISHNEX TODAY'S SPECIAL HERO CARD (Exact Reference Screen 6 Layout)
+// Elevated Emerald Card, Ambient Food Glow & Tactile Action Navigation
 // ==============================================================================
 
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import React, { useRef } from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Image,
+  Animated,
+  Platform,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import { MenuItem } from '../../types';
 import { colors } from '../../theme/colors';
 import { radii, spacing, shadows } from '../../theme/spacing';
@@ -18,40 +28,74 @@ export const SpecialPlateCard: React.FC<SpecialPlateCardProps> = ({
   item,
   onPress,
 }) => {
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+
+  const handlePressIn = () => {
+    try {
+      if (Platform.OS !== 'web') {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      }
+    } catch (_) {}
+
+    Animated.spring(scaleAnim, {
+      toValue: 0.98,
+      useNativeDriver: true,
+      speed: 40,
+      bounciness: 4,
+    }).start();
+  };
+
+  const handlePressOut = () => {
+    Animated.spring(scaleAnim, {
+      toValue: 1,
+      useNativeDriver: true,
+      speed: 40,
+      bounciness: 4,
+    }).start();
+  };
+
   return (
     <View style={styles.outerContainer}>
-      <TouchableOpacity
-        activeOpacity={0.92}
-        onPress={onPress}
-        style={styles.card}
-      >
-        {/* Left Information */}
-        <View style={styles.textContainer}>
-          <Text style={styles.tagline}>Today's Special</Text>
-          <Text style={styles.title} numberOfLines={2}>
-            {item.name}
-          </Text>
-          <Text style={styles.description} numberOfLines={2}>
-            {item.description}
-          </Text>
-        </View>
-
-        {/* Right Plate Photo with lower-right circular arrow button */}
-        <View style={styles.imageWrapper}>
-          <Image
-            source={{ uri: item.imageUrl }}
-            style={styles.plateImage}
-            resizeMode="cover"
-          />
-          <View style={styles.arrowButton}>
-            <Ionicons name="arrow-forward" size={16} color={colors.textDark} />
+      <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+        <TouchableOpacity
+          activeOpacity={0.92}
+          onPress={onPress}
+          onPressIn={handlePressIn}
+          onPressOut={handlePressOut}
+          style={styles.card}
+          accessibilityRole="button"
+          accessibilityLabel={`Today's Special, ${item.name}`}
+        >
+          {/* Left Information */}
+          <View style={styles.textContainer}>
+            <Text style={styles.tagline}>Today's Special</Text>
+            <Text style={styles.title} numberOfLines={2}>
+              {item.name}
+            </Text>
+            <Text style={styles.description} numberOfLines={2}>
+              {item.description}
+            </Text>
           </View>
-        </View>
-      </TouchableOpacity>
+
+          {/* Right Plate Photo with glowing aura & circular lime arrow */}
+          <View style={styles.imageWrapper}>
+            <View style={styles.plateGlow} />
+            <Image
+              source={{ uri: item.imageUrl }}
+              style={styles.plateImage}
+              resizeMode="cover"
+            />
+            <View style={styles.arrowButton}>
+              <Ionicons name="arrow-forward" size={16} color={colors.textDark} />
+            </View>
+          </View>
+        </TouchableOpacity>
+      </Animated.View>
 
       {/* Pagination Dots */}
       <View style={styles.dotsRow}>
         <View style={[styles.dot, styles.activeDot]} />
+        <View style={styles.dot} />
         <View style={styles.dot} />
         <View style={styles.dot} />
       </View>
@@ -71,7 +115,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.borderSubtle,
     overflow: 'hidden',
-    ...shadows.card,
+    ...shadows.cardElevated,
   },
   textContainer: {
     flex: 1.2,
@@ -83,6 +127,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: colors.textSecondary,
     marginBottom: 4,
+    letterSpacing: 0.3,
   },
   title: {
     fontFamily: 'serif',
@@ -104,6 +149,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     position: 'relative',
   },
+  plateGlow: {
+    position: 'absolute',
+    width: 124,
+    height: 124,
+    borderRadius: 62,
+    backgroundColor: 'rgba(72, 199, 131, 0.15)',
+  },
   plateImage: {
     width: 120,
     height: 120,
@@ -120,11 +172,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.accent,
     alignItems: 'center',
     justifyContent: 'center',
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.35,
-    shadowRadius: 4,
+    ...shadows.accent,
   },
   dotsRow: {
     flexDirection: 'row',
@@ -140,8 +188,8 @@ const styles = StyleSheet.create({
     marginHorizontal: 3,
   },
   activeDot: {
-    width: 18,
+    width: 20,
     backgroundColor: colors.accent,
+    borderRadius: 3,
   },
 });
-

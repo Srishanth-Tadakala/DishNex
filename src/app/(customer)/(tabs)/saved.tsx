@@ -1,5 +1,5 @@
 // ==============================================================================
-// SCREEN 11 — SAVED / FAVOURITES
+// SCREEN 11 — SAVED / FAVOURITES (DishNex Saved Catalog & Smooth Interactions)
 // ==============================================================================
 
 import React, { useEffect, useState } from 'react';
@@ -66,6 +66,7 @@ export default function SavedScreen() {
           data={favoriteItems}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
           renderItem={({ item }) => (
             <FoodCard
               item={item}
@@ -85,7 +86,7 @@ export default function SavedScreen() {
         />
       ) : (
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyTitle}>EMBER Flagship — Rajkot</Text>
+          <Text style={styles.emptyTitle}>DishNex Flagship — Rajkot</Text>
           <Text style={styles.emptySub}>
             Your primary luxury dining destination is saved.
           </Text>
@@ -127,6 +128,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: colors.textMuted,
     textAlign: 'center',
+    lineHeight: 20,
   },
 });
-

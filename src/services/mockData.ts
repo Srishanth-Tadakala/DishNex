@@ -1,13 +1,13 @@
 // ==============================================================================
-// EMBER — MOCK DATASET (100% Visual Reference Aligned)
+// DISHNEX — MOCK DATASET (100% Visual Reference Aligned)
 // ==============================================================================
 
 import { MenuCategory, MenuItem, Address, Coupon, Order } from '../types';
 
 export const MOCK_RESTAURANT = {
   id: 'e0000000-0000-0000-0000-000000000001',
-  name: 'EMBER',
-  tagline: 'Food, with feeling.',
+  name: 'DishNex',
+  tagline: 'Discover. Dine. Delight.',
   description: 'A luxury fine-dining sanctuary offering modern Indian gastronomy, dum-cooked biryanis, and artisanal confections.',
   logoUrl: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=200&q=80',
   currency: 'INR',
@@ -16,7 +16,7 @@ export const MOCK_RESTAURANT = {
 export const MOCK_BRANCH = {
   id: 'b0000000-0000-0000-0000-000000000001',
   restaurantId: MOCK_RESTAURANT.id,
-  name: 'EMBER Flagship — Rajkot',
+  name: 'DishNex Flagship — Rajkot',
   addressLine: 'Marwadi University Road, Gauridad',
   city: 'Rajkot',
   state: 'Gujarat',
@@ -342,8 +342,8 @@ export const MOCK_COUPONS: Coupon[] = [
     maxDiscountPaise: 15000,
   },
   {
-    id: 'coup-emberfest',
-    code: 'EMBERFEST',
+    id: 'coup-dishnex',
+    code: 'DISHNEX',
     description: 'Flat ₹100 off on gourmet orders over ₹500',
     discountType: 'flat',
     discountValue: 10000,

@@ -1,5 +1,5 @@
 // ==============================================================================
-// SCREEN 05 — SIGN IN / SIGN UP
+// SCREEN 05 — SIGN IN / SIGN UP (DishNex Brand & Interactive Micro-Interactions)
 // ==============================================================================
 
 import React, { useState } from 'react';
@@ -12,12 +12,14 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  Animated,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import { colors } from '../../theme/colors';
 import { radii, spacing, shadows } from '../../theme/spacing';
-import { EmberFlameLogo } from '../../components/common/EmberFlameLogo';
+import { DishNexFlameLogo } from '../../components/common/EmberFlameLogo';
 import { Button } from '../../components/common/Button';
 import { SegmentedControl } from '../../components/common/SegmentedControl';
 import { useAuthStore } from '../../store/authStore';
@@ -27,15 +29,21 @@ export default function SignInScreen() {
   const { signIn, signUp, isLoading } = useAuthStore();
 
   const [mode, setMode] = useState<'signin' | 'signup'>('signin');
-  const [emailOrPhone, setEmailOrPhone] = useState('siddu@ember.luxury');
+  const [emailOrPhone, setEmailOrPhone] = useState('siddu@dishnex.luxury');
   const [password, setPassword] = useState('••••••••••••');
   const [fullName, setFullName] = useState('Siddu');
   const [showPassword, setShowPassword] = useState(false);
+  const [focusedInput, setFocusedInput] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState('');
 
   const handleSubmit = async () => {
     setErrorMessage('');
     if (!emailOrPhone) {
+      try {
+        if (Platform.OS !== 'web') {
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+        }
+      } catch (_) {}
       setErrorMessage('Please enter your email or phone number.');
       return;
     }
@@ -48,6 +56,11 @@ export default function SignInScreen() {
       }
       router.replace('/(customer)/(tabs)');
     } catch (e: any) {
+      try {
+        if (Platform.OS !== 'web') {
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+        }
+      } catch (_) {}
       setErrorMessage(e.message || 'Authentication failed. Please retry.');
     }
   };
@@ -60,10 +73,11 @@ export default function SignInScreen() {
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
       >
         {/* Top Flame Branding */}
         <View style={styles.brandWrapper}>
-          <EmberFlameLogo size="small" showTagline={false} />
+          <DishNexFlameLogo size="small" showTagline={false} />
         </View>
 
         {/* Headings */}
@@ -73,7 +87,7 @@ export default function SignInScreen() {
         <Text style={styles.greetingSubtitle}>
           {mode === 'signin'
             ? 'Sign in to continue your culinary journey.'
-            : 'Join EMBER to explore fine dining & artisan flavours.'}
+            : 'Join DishNex to explore fine dining & artisan flavours.'}
         </Text>
 
         {/* Segmented Selector: Sign In | Sign Up */}
@@ -93,11 +107,20 @@ export default function SignInScreen() {
         {/* Form Inputs */}
         <View style={styles.formContainer}>
           {mode === 'signup' && (
-            <View style={styles.inputContainer}>
+            <View
+              style={[
+                styles.inputContainer,
+                focusedInput === 'name' && styles.inputFocused,
+              ]}
+            >
               <Ionicons
                 name="person-outline"
                 size={20}
-                color={colors.textSecondary}
+                color={
+                  focusedInput === 'name'
+                    ? colors.accent
+                    : colors.textSecondary
+                }
                 style={styles.inputIcon}
               />
               <TextInput
@@ -106,16 +129,27 @@ export default function SignInScreen() {
                 style={styles.textInput}
                 value={fullName}
                 onChangeText={setFullName}
+                onFocus={() => setFocusedInput('name')}
+                onBlur={() => setFocusedInput(null)}
               />
             </View>
           )}
 
           {/* Email or Phone */}
-          <View style={styles.inputContainer}>
+          <View
+            style={[
+              styles.inputContainer,
+              focusedInput === 'email' && styles.inputFocused,
+            ]}
+          >
             <Ionicons
               name="mail-outline"
               size={20}
-              color={colors.textSecondary}
+              color={
+                focusedInput === 'email'
+                  ? colors.accent
+                  : colors.textSecondary
+              }
               style={styles.inputIcon}
             />
             <TextInput
@@ -126,27 +160,40 @@ export default function SignInScreen() {
               keyboardType="email-address"
               value={emailOrPhone}
               onChangeText={setEmailOrPhone}
+              onFocus={() => setFocusedInput('email')}
+              onBlur={() => setFocusedInput(null)}
             />
           </View>
 
           {/* Password */}
-          <View style={styles.inputContainer}>
+          <View
+            style={[
+              styles.inputContainer,
+              focusedInput === 'password' && styles.inputFocused,
+            ]}
+          >
             <Ionicons
               name="lock-closed-outline"
               size={20}
-              color={colors.textSecondary}
+              color={
+                focusedInput === 'password'
+                  ? colors.accent
+                  : colors.textSecondary
+              }
               style={styles.inputIcon}
             />
             <TextInput
               placeholder="Password"
               placeholderTextColor={colors.textMuted}
+              style={[styles.textInput, { flex: 1 }]}
               secureTextEntry={!showPassword}
-              style={styles.textInput}
               value={password}
               onChangeText={setPassword}
+              onFocus={() => setFocusedInput('password')}
+              onBlur={() => setFocusedInput(null)}
             />
             <TouchableOpacity
-              onPress={() => setShowPassword((prev) => !prev)}
+              onPress={() => setShowPassword(!showPassword)}
               activeOpacity={0.7}
               hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             >
@@ -195,6 +242,8 @@ export default function SignInScreen() {
             style={styles.socialButton}
             onPress={handleSubmit}
             activeOpacity={0.8}
+            accessibilityRole="button"
+            accessibilityLabel="Continue with Google"
           >
             <Ionicons name="logo-google" size={20} color={colors.textPrimary} />
           </TouchableOpacity>
@@ -204,6 +253,8 @@ export default function SignInScreen() {
             style={styles.socialButton}
             onPress={handleSubmit}
             activeOpacity={0.8}
+            accessibilityRole="button"
+            accessibilityLabel="Continue with Apple"
           >
             <Ionicons name="logo-apple" size={22} color={colors.textPrimary} />
           </TouchableOpacity>
@@ -213,6 +264,8 @@ export default function SignInScreen() {
             style={styles.socialButton}
             onPress={handleSubmit}
             activeOpacity={0.8}
+            accessibilityRole="button"
+            accessibilityLabel="Continue with Phone"
           >
             <Ionicons name="call-outline" size={20} color={colors.textPrimary} />
           </TouchableOpacity>
@@ -222,7 +275,7 @@ export default function SignInScreen() {
         <View style={styles.footerRow}>
           <Text style={styles.footerText}>
             {mode === 'signin'
-              ? 'New to Ember? '
+              ? 'New to DishNex? '
               : 'Already have an account? '}
           </Text>
           <TouchableOpacity
@@ -257,15 +310,17 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: colors.textPrimary,
     marginBottom: 6,
+    textAlign: 'center',
   },
   greetingSubtitle: {
     fontSize: 14,
     color: colors.textSecondary,
+    textAlign: 'center',
+    marginBottom: spacing.xxl,
     lineHeight: 20,
-    marginBottom: spacing.xl,
   },
   segmentedControl: {
-    marginBottom: spacing.xl,
+    marginBottom: spacing.xxl,
   },
   formContainer: {
     width: '100%',
@@ -273,13 +328,18 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.surface,
+    backgroundColor: colors.surfaceSecondary,
     borderRadius: radii.xl,
     paddingHorizontal: spacing.lg,
-    paddingVertical: 14,
+    paddingVertical: Platform.OS === 'ios' ? 14 : 10,
     borderWidth: 1,
     borderColor: colors.borderSubtle,
-    marginBottom: spacing.md,
+    marginBottom: spacing.lg,
+  },
+  inputFocused: {
+    borderColor: colors.accent,
+    backgroundColor: colors.surfaceElevated,
+    ...shadows.emeraldGlow,
   },
   inputIcon: {
     marginRight: spacing.md,
@@ -288,27 +348,26 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 15,
     color: colors.textPrimary,
+    padding: 0,
   },
   forgotPasswordContainer: {
     alignSelf: 'flex-end',
-    marginBottom: spacing.lg,
+    marginBottom: spacing.xl,
+    marginTop: -spacing.xs,
   },
   forgotPasswordText: {
-    fontSize: 12,
-    color: colors.textSecondary,
-  },
-  errorText: {
-    color: colors.error,
     fontSize: 13,
-    marginBottom: spacing.md,
+    color: colors.textSecondary,
+    fontWeight: '500',
   },
   submitButton: {
-    marginTop: spacing.sm,
+    marginTop: spacing.xs,
+    marginBottom: spacing.xxl,
   },
   socialDivider: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: spacing.xl,
+    marginBottom: spacing.xl,
   },
   dividerLine: {
     flex: 1,
@@ -316,15 +375,16 @@ const styles = StyleSheet.create({
     backgroundColor: colors.borderSubtle,
   },
   dividerText: {
-    marginHorizontal: spacing.md,
     fontSize: 12,
     color: colors.textMuted,
+    marginHorizontal: spacing.lg,
+    textTransform: 'lowercase',
   },
   socialRow: {
     flexDirection: 'row',
     justifyContent: 'center',
     gap: spacing.lg,
-    marginBottom: spacing.xxl,
+    marginBottom: spacing.xxxl,
   },
   socialButton: {
     width: 52,
@@ -351,5 +411,10 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: colors.accent,
   },
+  errorText: {
+    color: colors.error,
+    fontSize: 13,
+    marginBottom: spacing.md,
+    textAlign: 'center',
+  },
 });
-

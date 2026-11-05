@@ -1,10 +1,19 @@
 // ==============================================================================
-// EMBER QUANTITY STEPPER COMPONENT ([-] 1 [+])
+// DISHNEX QUANTITY STEPPER COMPONENT ([-] 1 [+])
+// Tactile Controls with Spring Bump & Haptic Feedback
 // ==============================================================================
 
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useRef, useEffect } from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Animated,
+  Platform,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import { colors } from '../../theme/colors';
 import { radii } from '../../theme/spacing';
 
@@ -22,31 +31,80 @@ export const QuantityStepper: React.FC<QuantityStepperProps> = ({
   size = 'small',
 }) => {
   const isSmall = size === 'small';
+  const numScale = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    Animated.sequence([
+      Animated.timing(numScale, {
+        toValue: 1.25,
+        duration: 90,
+        useNativeDriver: true,
+      }),
+      Animated.spring(numScale, {
+        toValue: 1,
+        friction: 4,
+        tension: 40,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [quantity]);
+
+  const handleDec = () => {
+    try {
+      if (Platform.OS !== 'web') {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      }
+    } catch (_) {}
+    onDecrement();
+  };
+
+  const handleInc = () => {
+    try {
+      if (Platform.OS !== 'web') {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      }
+    } catch (_) {}
+    onIncrement();
+  };
 
   return (
-    <View style={[styles.container, isSmall ? styles.smallContainer : styles.mediumContainer]}>
+    <View
+      style={[
+        styles.container,
+        isSmall ? styles.smallContainer : styles.mediumContainer,
+      ]}
+    >
       <TouchableOpacity
-        onPress={onDecrement}
+        onPress={handleDec}
         activeOpacity={0.7}
         style={styles.button}
         hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        accessibilityRole="button"
+        accessibilityLabel="Decrease quantity"
       >
         <Ionicons
           name={quantity === 1 ? 'trash-outline' : 'remove'}
           size={isSmall ? 13 : 16}
-          color={colors.textSecondary}
+          color={quantity === 1 ? colors.error : colors.textSecondary}
         />
       </TouchableOpacity>
 
-      <Text style={[styles.quantityText, { fontSize: isSmall ? 13 : 15 }]}>
+      <Animated.Text
+        style={[
+          styles.quantityText,
+          { fontSize: isSmall ? 13 : 15, transform: [{ scale: numScale }] },
+        ]}
+      >
         {quantity}
-      </Text>
+      </Animated.Text>
 
       <TouchableOpacity
-        onPress={onIncrement}
+        onPress={handleInc}
         activeOpacity={0.7}
         style={styles.button}
         hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        accessibilityRole="button"
+        accessibilityLabel="Increase quantity"
       >
         <Ionicons
           name="add"
@@ -88,4 +146,3 @@ const styles = StyleSheet.create({
     marginHorizontal: 8,
   },
 });
-

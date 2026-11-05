@@ -1,11 +1,20 @@
 // ==============================================================================
-// EMBER SEGMENTED CONTROL (Pill Tab Selector)
+// DISHNEX SEGMENTED CONTROL (Pill Tab Selector)
+// Tactile Selection Transitions with Luminous Lime Highlights
 // ==============================================================================
 
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ViewStyle } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  ViewStyle,
+  Platform,
+} from 'react-native';
+import * as Haptics from 'expo-haptics';
 import { colors } from '../../theme/colors';
-import { radii, spacing } from '../../theme/spacing';
+import { radii, shadows } from '../../theme/spacing';
 
 export interface SegmentOption<T extends string> {
   key: T;
@@ -25,6 +34,17 @@ export function SegmentedControl<T extends string>({
   onSelect,
   style,
 }: SegmentedControlProps<T>) {
+  const handleSelect = (key: T) => {
+    if (key !== selectedKey) {
+      try {
+        if (Platform.OS !== 'web') {
+          Haptics.selectionAsync();
+        }
+      } catch (_) {}
+      onSelect(key);
+    }
+  };
+
   return (
     <View style={[styles.container, style]}>
       {options.map((opt) => {
@@ -33,11 +53,13 @@ export function SegmentedControl<T extends string>({
           <TouchableOpacity
             key={opt.key}
             activeOpacity={0.8}
-            onPress={() => onSelect(opt.key)}
+            onPress={() => handleSelect(opt.key)}
             style={[
               styles.segment,
               isSelected ? styles.selectedSegment : styles.unselectedSegment,
             ]}
+            accessibilityRole="tab"
+            accessibilityState={{ selected: isSelected }}
           >
             <Text
               style={[
@@ -65,13 +87,14 @@ const styles = StyleSheet.create({
   },
   segment: {
     flex: 1,
-    paddingVertical: 7,
+    paddingVertical: 8,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: radii.full,
   },
   selectedSegment: {
     backgroundColor: colors.accent,
+    ...shadows.accent,
   },
   unselectedSegment: {
     backgroundColor: 'transparent',
@@ -88,4 +111,3 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
   },
 });
-

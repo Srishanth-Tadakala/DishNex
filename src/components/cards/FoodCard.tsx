@@ -1,10 +1,20 @@
 // ==============================================================================
-// EMBER FOOD CARD (Exact Reference Screen 8 / 10 / 11 Layout)
+// DISHNEX FOOD CARD (Exact Reference Screen 8 / 10 / 11 Layout)
+// Rich Surface Depth, Heart Bounce Animation & Tactile Add-to-Cart Feedback
 // ==============================================================================
 
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import React, { useRef } from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Image,
+  Animated,
+  Platform,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import { MenuItem } from '../../types';
 import { colors } from '../../theme/colors';
 import { radii, spacing, shadows } from '../../theme/spacing';
@@ -32,13 +42,58 @@ export const FoodCard: React.FC<FoodCardProps> = ({
   const isFav = isDishFavorite(item.id);
   const isIvory = variant === 'ivory';
 
+  // Heart bounce animation
+  const heartScale = useRef(new Animated.Value(1)).current;
+  // Add button spring scale
+  const addScale = useRef(new Animated.Value(1)).current;
+
   const handleFavoritePress = (e: any) => {
     e.stopPropagation();
+    try {
+      if (Platform.OS !== 'web') {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      }
+    } catch (_) {}
+
+    Animated.sequence([
+      Animated.timing(heartScale, {
+        toValue: 1.4,
+        duration: 120,
+        useNativeDriver: true,
+      }),
+      Animated.spring(heartScale, {
+        toValue: 1,
+        friction: 3,
+        tension: 40,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
     toggleFavoriteDish(item);
   };
 
   const handleAddPress = (e: any) => {
     e.stopPropagation();
+    try {
+      if (Platform.OS !== 'web') {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      }
+    } catch (_) {}
+
+    Animated.sequence([
+      Animated.timing(addScale, {
+        toValue: 0.85,
+        duration: 80,
+        useNativeDriver: true,
+      }),
+      Animated.spring(addScale, {
+        toValue: 1,
+        friction: 3,
+        tension: 40,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
     addItem(item, [], 1);
   };
 
@@ -46,12 +101,11 @@ export const FoodCard: React.FC<FoodCardProps> = ({
     <TouchableOpacity
       activeOpacity={0.88}
       onPress={onPress}
-      style={[
-        styles.card,
-        isIvory && styles.cardIvory,
-      ]}
+      style={[styles.card, isIvory && styles.cardIvory]}
+      accessibilityRole="button"
+      accessibilityLabel={`${item.name}, ${formatPaise(item.pricePaise)}`}
     >
-      {/* Food Thumbnail */}
+      {/* Food Thumbnail with crisp rounded corners */}
       <Image
         source={{ uri: item.imageUrl }}
         style={styles.image}
@@ -63,10 +117,7 @@ export const FoodCard: React.FC<FoodCardProps> = ({
         <View style={styles.titleRow}>
           <DietaryBadge type={item.dietaryClassification} size={14} />
           <Text
-            style={[
-              styles.name,
-              isIvory && styles.nameIvory,
-            ]}
+            style={[styles.name, isIvory && styles.nameIvory]}
             numberOfLines={1}
           >
             {item.name}
@@ -77,15 +128,10 @@ export const FoodCard: React.FC<FoodCardProps> = ({
           rating={item.rating}
           reviewsCount={item.reviewsCount}
           size="small"
-          textColor={isIvory ? '#10271D' : undefined}
+          textColor={isIvory ? '#071A14' : undefined}
         />
 
-        <Text
-          style={[
-            styles.price,
-            isIvory && styles.priceIvory,
-          ]}
-        >
+        <Text style={[styles.price, isIvory && styles.priceIvory]}>
           {formatPaise(item.pricePaise)}
         </Text>
       </View>
@@ -96,22 +142,31 @@ export const FoodCard: React.FC<FoodCardProps> = ({
           onPress={handleFavoritePress}
           activeOpacity={0.7}
           style={styles.favoriteButton}
-          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          accessibilityRole="button"
+          accessibilityLabel={isFav ? 'Remove from favorites' : 'Add to favorites'}
         >
-          <Ionicons
-            name={isFav ? 'heart' : 'heart-outline'}
-            size={18}
-            color={isFav ? '#E53935' : isIvory ? '#79877D' : colors.textSecondary}
-          />
+          <Animated.View style={{ transform: [{ scale: heartScale }] }}>
+            <Ionicons
+              name={isFav ? 'heart' : 'heart-outline'}
+              size={19}
+              color={isFav ? '#FF4D4D' : isIvory ? '#91A397' : colors.textSecondary}
+            />
+          </Animated.View>
         </TouchableOpacity>
 
         {showAddButton && (
           <TouchableOpacity
             onPress={handleAddPress}
             activeOpacity={0.8}
-            style={styles.addButton}
+            accessibilityRole="button"
+            accessibilityLabel={`Add ${item.name} to cart`}
           >
-            <Ionicons name="add" size={18} color={colors.textDark} />
+            <Animated.View
+              style={[styles.addButton, { transform: [{ scale: addScale }] }]}
+            >
+              <Ionicons name="add" size={19} color={colors.textDark} />
+            </Animated.View>
           </TouchableOpacity>
         )}
       </View>
@@ -132,14 +187,14 @@ const styles = StyleSheet.create({
     ...shadows.card,
   },
   cardIvory: {
-    backgroundColor: '#F4F0E7',
-    borderColor: 'rgba(0, 0, 0, 0.05)',
+    backgroundColor: '#FFF8EA',
+    borderColor: 'rgba(0, 0, 0, 0.06)',
   },
   nameIvory: {
-    color: '#10271D',
+    color: '#071A14',
   },
   priceIvory: {
-    color: '#10271D',
+    color: '#071A14',
   },
   image: {
     width: 76,
@@ -177,7 +232,7 @@ const styles = StyleSheet.create({
     paddingLeft: spacing.sm,
   },
   favoriteButton: {
-    padding: 2,
+    padding: 3,
   },
   addButton: {
     width: 28,
@@ -186,6 +241,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.accent,
     alignItems: 'center',
     justifyContent: 'center',
+    ...shadows.accent,
   },
 });
-

@@ -1,5 +1,6 @@
 // ==============================================================================
-// EMBER RATING BADGE COMPONENT
+// DISHNEX RATING BADGE COMPONENT
+// Luminous Gold Star Rating with Accessible Contrast
 // ==============================================================================
 
 import React from 'react';
@@ -37,7 +38,7 @@ export const RatingBadge: React.FC<RatingBadgeProps> = ({
       <Ionicons
         name="star"
         size={isSmall ? 12 : 14}
-        color="#F5C042"
+        color={colors.gold} // Luminous warm gold #FFC66B
         style={styles.star}
       />
       <Text
@@ -54,7 +55,7 @@ export const RatingBadge: React.FC<RatingBadgeProps> = ({
           style={[
             styles.reviews,
             { fontSize: isSmall ? 11 : 13 },
-            textColor ? { color: textColor, opacity: 0.75 } : undefined,
+            textColor ? { color: textColor, opacity: 0.8 } : undefined,
           ]}
         >
           {showCountText
@@ -70,6 +71,7 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginVertical: 2,
   },
   star: {
     marginRight: 3,
@@ -80,6 +82,6 @@ const styles = StyleSheet.create({
   },
   reviews: {
     color: colors.textMuted,
+    marginLeft: 2,
   },
 });
-

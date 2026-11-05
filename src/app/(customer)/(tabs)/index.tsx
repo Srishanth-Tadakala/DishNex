@@ -1,8 +1,8 @@
 // ==============================================================================
-// SCREEN 06 — HOME / DISCOVER
+// SCREEN 06 — HOME / DISCOVER (DishNex Luxury Presentation & Micro-Interactions)
 // ==============================================================================
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -10,10 +10,12 @@ import {
   ScrollView,
   Image,
   TouchableOpacity,
-  TextInput,
+  Animated,
+  Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import { colors } from '../../../theme/colors';
 import { radii, spacing, shadows } from '../../../theme/spacing';
 import { SegmentedControl } from '../../../components/common/SegmentedControl';
@@ -33,6 +35,10 @@ export default function HomeScreen() {
   const [featuredItem, setFeaturedItem] = useState<MenuItem | null>(null);
   const [trendingItems, setTrendingItems] = useState<MenuItem[]>([]);
 
+  // Entrance animations
+  const heroFade = useRef(new Animated.Value(0)).current;
+  const heroSlide = useRef(new Animated.Value(15)).current;
+
   useEffect(() => {
     async function loadHomeData() {
       const [cats, feat, items] = await Promise.all([
@@ -43,12 +49,40 @@ export default function HomeScreen() {
       setCategories(cats);
       setFeaturedItem(feat);
       setTrendingItems(items);
+
+      Animated.parallel([
+        Animated.timing(heroFade, {
+          toValue: 1,
+          duration: 350,
+          useNativeDriver: true,
+        }),
+        Animated.spring(heroSlide, {
+          toValue: 0,
+          friction: 6,
+          tension: 40,
+          useNativeDriver: true,
+        }),
+      ]).start();
     }
     loadHomeData();
   }, []);
 
   const handleSearchFocus = () => {
+    try {
+      if (Platform.OS !== 'web') {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      }
+    } catch (_) {}
     router.push('/(customer)/search');
+  };
+
+  const handleCategoryPress = (catId: string) => {
+    try {
+      if (Platform.OS !== 'web') {
+        Haptics.selectionAsync();
+      }
+    } catch (_) {}
+    router.push(`/(customer)/category/${catId}`);
   };
 
   return (
@@ -63,6 +97,8 @@ export default function HomeScreen() {
           activeOpacity={0.8}
           onPress={() => router.push('/(customer)/profile')}
           style={styles.profileRow}
+          accessibilityRole="button"
+          accessibilityLabel="Open user profile"
         >
           <Image
             source={{
@@ -82,17 +118,21 @@ export default function HomeScreen() {
           activeOpacity={0.8}
           onPress={() => router.push('/(customer)/orders')}
           style={styles.notificationButton}
+          accessibilityRole="button"
+          accessibilityLabel="View notifications and order updates"
         >
           <Ionicons name="notifications-outline" size={20} color={colors.textPrimary} />
           <View style={styles.notificationDot} />
         </TouchableOpacity>
       </View>
 
-      {/* 2. Search Bar Shortcut */}
+      {/* 2. Search Bar Shortcut with subtle focus glow */}
       <TouchableOpacity
         activeOpacity={0.85}
         onPress={handleSearchFocus}
         style={styles.searchBar}
+        accessibilityRole="search"
+        accessibilityLabel="Search dishes and cuisines"
       >
         <Ionicons
           name="search-outline"
@@ -117,12 +157,19 @@ export default function HomeScreen() {
         style={styles.orderSelector}
       />
 
-      {/* 4. Today's Special Hero Card */}
+      {/* 4. Today's Special Hero Card with Entrance Animation */}
       {featuredItem && (
-        <SpecialPlateCard
-          item={featuredItem}
-          onPress={() => router.push(`/(customer)/food/${featuredItem.id}`)}
-        />
+        <Animated.View
+          style={{
+            opacity: heroFade,
+            transform: [{ translateY: heroSlide }],
+          }}
+        >
+          <SpecialPlateCard
+            item={featuredItem}
+            onPress={() => router.push(`/(customer)/food/${featuredItem.id}`)}
+          />
+        </Animated.View>
       )}
 
       {/* 5. Categories Section */}
@@ -136,7 +183,7 @@ export default function HomeScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Categories Horizontal Carousel */}
+      {/* Categories Horizontal Carousel with Tactile Feedback */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -146,8 +193,10 @@ export default function HomeScreen() {
           <TouchableOpacity
             key={cat.id}
             activeOpacity={0.8}
-            onPress={() => router.push(`/(customer)/category/${cat.id}`)}
+            onPress={() => handleCategoryPress(cat.id)}
             style={styles.categoryItem}
+            accessibilityRole="button"
+            accessibilityLabel={`${cat.name} category`}
           >
             <View style={styles.categoryCircle}>
               {cat.imageUrl && (
@@ -210,6 +259,7 @@ const styles = StyleSheet.create({
   greetingSub: {
     fontSize: 12,
     color: colors.textSecondary,
+    fontWeight: '500',
   },
   greetingName: {
     fontSize: 16,
@@ -225,6 +275,7 @@ const styles = StyleSheet.create({
     borderColor: colors.borderSubtle,
     alignItems: 'center',
     justifyContent: 'center',
+    ...shadows.card,
   },
   notificationDot: {
     position: 'absolute',
@@ -245,6 +296,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.borderSubtle,
     marginBottom: spacing.lg,
+    ...shadows.card,
   },
   searchIcon: {
     marginRight: spacing.sm,
@@ -267,6 +319,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '700',
     color: colors.textPrimary,
+    letterSpacing: -0.2,
   },
   seeAllLink: {
     fontSize: 13,
@@ -287,9 +340,10 @@ const styles = StyleSheet.create({
     borderRadius: 29,
     overflow: 'hidden',
     backgroundColor: colors.surfaceSecondary,
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: colors.borderSubtle,
     marginBottom: 6,
+    ...shadows.card,
   },
   categoryThumb: {
     width: '100%',
@@ -305,4 +359,3 @@ const styles = StyleSheet.create({
     marginTop: spacing.xs,
   },
 });
-

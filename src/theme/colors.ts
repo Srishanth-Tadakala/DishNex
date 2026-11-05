@@ -1,55 +1,71 @@
 // ==============================================================================
-// EMBER DESIGN SYSTEM — COLOR TOKENS (Part 3.2 Specification)
+// DISHNEX DESIGN SYSTEM — ADVANCED COLOR TOKENS (Part 04 Specification)
+// Premium Luxury Emerald Hospitality Palette with Vibrant Lime Accents
 // ==============================================================================
 
 export const colors = {
-  // Backgrounds
-  background: '#06130F',          // Deep obsidian emerald
-  backgroundSecondary: '#0B1D15', // Rich dark forest
-  
-  // Surfaces & Glassmorphism
-  surface: '#10271D',             // Elevated card surface
-  surfaceSecondary: '#193629',    // Secondary component surface
-  surfaceGlass: 'rgba(16, 39, 29, 0.85)',
-  surfaceGlassLight: 'rgba(25, 54, 41, 0.65)',
-  surfaceHighlight: 'rgba(216, 240, 107, 0.08)',
-  warmIvory: '#F4F0E7',           // Part 3.2 warm ivory tactile surface
-  surfaceIvory: '#F4F0E7',        // Tactile hospitality paper surface
-  surfaceIvorySubtle: '#EDE8DD',  // Muted ivory card container
-  
-  // Accents & Actions
-  accent: '#D8F06B',              // Vibrant signature chartreuse/lime
-  accentSecondary: '#B7E44F',     // Slightly deeper active lime
-  accentDark: '#244D3A',          // Forest green badge/accent
-  accentGlow: 'rgba(216, 240, 107, 0.25)',
+  // Background System (Deep Obsidian & Forest Emerald)
+  background: '#071A14',          // Primary dark background
+  backgroundSecondary: '#0B2118', // Secondary deeper emerald
+  backgroundElevated: '#10291D',  // Elevated section container background
 
-  // Typography
-  textPrimary: '#F5F5EE',         // Crisp warm ivory for titles
-  textSecondary: '#A8B6AA',       // Soft sage for descriptions
-  textMuted: '#79877D',           // Muted olive for hints & timestamps
-  textDark: '#06130F',            // High contrast text inside lime buttons
-  textIvory: '#F4F0E7',           // Warm editorial headlines
+  // Surface System (Rich Dimensional Emerald)
+  surface: '#153A2A',             // Primary card & module surface
+  surfaceSecondary: '#1C4934',    // Secondary component surface & pill container
+  surfaceElevated: '#24563B',     // Elevated surface / high-contrast cards
+  surfaceGlass: 'rgba(38, 94, 63, 0.40)',       // Elegant glassmorphism backdrop
+  surfaceGlassLight: 'rgba(46, 110, 75, 0.25)', // Subtle transparent container
+  surfaceHighlight: 'rgba(223, 255, 99, 0.12)', // Luminous lime wash
+
+  // Hospitality Tactile Surfaces
+  warmIvory: '#FFF8EA',           // Warm ivory surface
+  surfaceIvory: '#FFF8EA',        // Tactile address & delivery container
+  surfaceIvorySubtle: '#F4EEE1',  // Subtle ivory card
+
+  // Primary Accent System (Luminous Signature Chartreuse & Emerald)
+  accent: '#DFFF63',              // Primary vibrant signature bright lime
+  accentSecondary: '#C5F15C',     // Secondary lime for gradients & hover states
+  accentDark: '#24563B',          // Deep forest green accent
+  accentHighlight: '#48C783',     // Emerald highlight & glowing edges
+  accentBrightGreen: '#36B66D',   // Vibrant emerald green
+
+  // Luminous Glows
+  accentGlow: 'rgba(223, 255, 99, 0.35)',
+  emeraldGlow: 'rgba(72, 199, 131, 0.25)',
+  goldGlow: 'rgba(255, 198, 107, 0.30)',
+
+  // Supporting Warm Tones
+  gold: '#FFC66B',                // Warm flame gold & star ratings
+  orange: '#F08A4B',              // Flame amber & spicy indicator
+  softWhite: '#FFFFFF',
+
+  // Typography System (Maximum Readability on Dark Emerald)
+  textPrimary: '#FFFFFF',         // Crisp editorial titles & headlines
+  textSecondary: '#C3D1C6',       // Soft sage for descriptions & subtitles
+  textMuted: '#91A397',           // Muted olive for timestamps & secondary hints
+  textDark: '#071A14',            // High-contrast deep obsidian text inside lime buttons
+  textIvory: '#FFF8EA',           // Editorial serif headlines
 
   // Borders & Dividers
-  border: '#355344',              // Prominent border
-  borderSubtle: '#1E3A2B',        // Card outline stroke
-  borderGlass: 'rgba(53, 83, 68, 0.6)',
-  borderAccent: '#D8F06B',
+  border: '#2E5F46',              // Prominent emerald border
+  borderSubtle: '#1E4231',        // Card outline stroke
+  borderLight: '#3D785A',         // Luminous card border highlight
+  borderGlass: 'rgba(72, 199, 131, 0.20)', // Subtle translucent edge
+  borderAccent: '#DFFF63',        // Active lime focus border
 
-  // Semantic Status
-  success: '#9BD94C',
-  warning: '#F1B75A',
-  error: '#E86C63',
-  info: '#64B5F6',
+  // Semantic Status Tokens
+  success: '#A4E96A',             // Positive green status
+  warning: '#FFC66B',             // Warning amber
+  error: '#FF7770',               // Error & negative status
+  info: '#5CE1E6',                // Information cyan
 
   // Food Dietary Badges
-  veg: '#4CAF50',
-  nonVeg: '#E53935',
+  veg: '#A4E96A',
+  nonVeg: '#FF7770',
 
-  // Overlays
-  overlay: 'rgba(6, 19, 15, 0.85)',
-  scrim: 'rgba(0, 0, 0, 0.6)',
+  // Overlays & Scrims
+  overlay: 'rgba(7, 26, 20, 0.88)',
+  scrim: 'rgba(0, 0, 0, 0.65)',
 } as const;
 
 export type ColorToken = keyof typeof colors;
-

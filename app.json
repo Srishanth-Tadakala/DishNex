@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "EMBER",
+    "name": "DishNex",
     "slug": "ember",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -11,7 +11,7 @@
     "splash": {
       "image": "./assets/images/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#06130F"
+      "backgroundColor": "#071A14"
     },
     "ios": {
       "supportsTablet": true
@@ -19,7 +19,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#06130F"
+        "backgroundColor": "#071A14"
       },
       "package": "com.ember.restaurant"
     },
@@ -38,4 +38,3 @@
     }
   }
 }
-

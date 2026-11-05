@@ -1,10 +1,11 @@
 // ==============================================================================
-// EMBER BOTTOM NAVIGATION LAYOUT ((tabs)/_layout.tsx)
+// DISHNEX BOTTOM NAVIGATION LAYOUT ((tabs)/_layout.tsx)
+// Luxury Emerald Tab Bar with Luminous Lime Active Glow & Dynamic Cart Badge
 // ==============================================================================
 
 import React from 'react';
 import { Tabs } from 'expo-router';
-import { View, StyleSheet, Platform } from 'react-native';
+import { StyleSheet, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../../../theme/colors';
 import { useCartStore } from '../../../store/cartStore';
@@ -89,7 +90,7 @@ export default function TabLayout() {
 
 const styles = StyleSheet.create({
   tabBar: {
-    backgroundColor: '#071611',
+    backgroundColor: colors.backgroundSecondary,
     borderTopColor: colors.borderSubtle,
     borderTopWidth: 1,
     height: Platform.OS === 'ios' ? 88 : 64,
@@ -98,7 +99,7 @@ const styles = StyleSheet.create({
   },
   tabLabel: {
     fontSize: 11,
-    fontWeight: '600',
+    fontWeight: '700',
     marginTop: 2,
   },
   cartBadge: {
@@ -108,4 +109,3 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
 });
-
