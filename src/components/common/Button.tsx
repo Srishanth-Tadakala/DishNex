@@ -1,6 +1,6 @@
 // ==============================================================================
-// DISHNEX BUTTON COMPONENT (Design System Specification)
-// Luminous Lime Action Buttons with Micro-Interactions & Haptic Response
+// DISHNEX BUTTON COMPONENT (Industry-Grade Luxury Specification)
+// Haute Chartreuse Multi-Stop Gradients, Specular Lighting & Spring Dynamics
 // ==============================================================================
 
 import React, { useRef } from 'react';
@@ -13,12 +13,12 @@ import {
   ViewStyle,
   TextStyle,
   View,
-  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import * as Haptics from 'expo-haptics';
+import { LinearGradient } from 'expo-linear-gradient';
 import { colors } from '../../theme/colors';
 import { radii, spacing, shadows } from '../../theme/spacing';
+import { triggerHaptic } from '../../theme/animations';
 
 export interface ButtonProps {
   title: string;
@@ -51,17 +51,13 @@ export const Button: React.FC<ButtonProps> = ({
 
   const handlePressIn = () => {
     if (disabled || loading) return;
-    try {
-      if (Platform.OS !== 'web') {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      }
-    } catch (_) {}
+    triggerHaptic.light();
 
     Animated.spring(scaleAnim, {
-      toValue: 0.97,
+      toValue: 0.965,
       useNativeDriver: true,
-      speed: 40,
-      bounciness: 4,
+      friction: 5,
+      tension: 100,
     }).start();
   };
 
@@ -70,67 +66,27 @@ export const Button: React.FC<ButtonProps> = ({
     Animated.spring(scaleAnim, {
       toValue: 1,
       useNativeDriver: true,
-      speed: 40,
-      bounciness: 4,
+      friction: 4,
+      tension: 60,
     }).start();
   };
 
-  const getContainerStyle = (): ViewStyle => {
-    let base: ViewStyle = {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      borderRadius: radii.full,
-    };
-
-    if (fullWidth) {
-      base.width = '100%';
-    }
-
-    // Size
+  // Sizing dimensions
+  const getPadding = () => {
     if (size === 'small') {
-      base.paddingVertical = spacing.sm;
-      base.paddingHorizontal = spacing.lg;
-    } else if (size === 'medium') {
-      base.paddingVertical = spacing.md;
-      base.paddingHorizontal = spacing.xl;
-    } else {
-      // Large
-      base.paddingVertical = spacing.lg;
-      base.paddingHorizontal = spacing.xxl;
+      return { paddingVertical: spacing.sm, paddingHorizontal: spacing.lg };
     }
-
-    // Variant
-    if (variant === 'primary') {
-      base.backgroundColor = colors.accent; // Signature Chartreuse Lime #D8F06B
-      base.borderWidth = 1;
-      base.borderColor = 'rgba(255, 255, 255, 0.25)';
-      Object.assign(base, shadows.accent);
-    } else if (variant === 'secondary') {
-      base.backgroundColor = colors.surfaceSecondary; // Deep emerald surface
-      base.borderWidth = 1;
-      base.borderColor = colors.border;
-    } else if (variant === 'outline') {
-      base.backgroundColor = 'transparent';
-      base.borderWidth = 1.5;
-      base.borderColor = colors.accent;
-    } else {
-      // Ghost
-      base.backgroundColor = 'transparent';
+    if (size === 'medium') {
+      return { paddingVertical: spacing.md, paddingHorizontal: spacing.xl };
     }
-
-    if (disabled) {
-      base.opacity = 0.5;
-    }
-
-    return base;
+    return { paddingVertical: 14, paddingHorizontal: spacing.xxl };
   };
 
   const getTextStyle = (): TextStyle => {
     const isPrimary = variant === 'primary';
     return {
       fontSize: size === 'small' ? 13 : size === 'medium' ? 14 : 16,
-      fontWeight: '700',
+      fontWeight: '800',
       color: isPrimary ? colors.textDark : colors.textPrimary,
       letterSpacing: isPrimary ? 0.3 : 0.2,
     };
@@ -139,6 +95,28 @@ export const Button: React.FC<ButtonProps> = ({
   const iconColor =
     variant === 'primary' ? colors.textDark : colors.textPrimary;
   const iconSize = size === 'small' ? 16 : size === 'medium' ? 18 : 20;
+
+  const renderContent = () => (
+    <View style={styles.contentRow}>
+      {iconLeft && (
+        <Ionicons
+          name={iconLeft}
+          size={iconSize}
+          color={iconColor}
+          style={styles.iconLeft}
+        />
+      )}
+      <Text style={[getTextStyle(), textStyle]}>{title}</Text>
+      {iconRight && (
+        <Ionicons
+          name={iconRight}
+          size={iconSize}
+          color={iconColor}
+          style={styles.iconRight}
+        />
+      )}
+    </View>
+  );
 
   return (
     <Animated.View
@@ -152,34 +130,52 @@ export const Button: React.FC<ButtonProps> = ({
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
         disabled={disabled || loading}
-        style={[getContainerStyle(), style]}
+        style={[
+          styles.baseContainer,
+          fullWidth && { width: '100%' },
+          variant === 'outline' && styles.outlineContainer,
+          variant === 'ghost' && styles.ghostContainer,
+          disabled && styles.disabledContainer,
+          style,
+        ]}
         accessibilityRole="button"
         accessibilityLabel={title}
         accessibilityState={{ disabled: disabled || loading }}
       >
-        {loading ? (
-          <ActivityIndicator
-            size="small"
-            color={variant === 'primary' ? colors.textDark : colors.accent}
-          />
-        ) : (
-          <View style={styles.contentRow}>
-            {iconLeft && (
-              <Ionicons
-                name={iconLeft}
-                size={iconSize}
-                color={iconColor}
-                style={styles.iconLeft}
-              />
+        {variant === 'primary' ? (
+          <LinearGradient
+            colors={[colors.accent, colors.accentSecondary]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={[styles.gradientInner, getPadding()]}
+          >
+            {/* Top specular hairline highlight */}
+            <View style={styles.specularHighlight} />
+            {loading ? (
+              <ActivityIndicator size="small" color={colors.textDark} />
+            ) : (
+              renderContent()
             )}
-            <Text style={[getTextStyle(), textStyle]}>{title}</Text>
-            {iconRight && (
-              <Ionicons
-                name={iconRight}
-                size={iconSize}
-                color={iconColor}
-                style={styles.iconRight}
-              />
+          </LinearGradient>
+        ) : variant === 'secondary' ? (
+          <LinearGradient
+            colors={[colors.surfaceSecondary, colors.surface]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 0, y: 1 }}
+            style={[styles.gradientInner, styles.secondaryBorder, getPadding()]}
+          >
+            {loading ? (
+              <ActivityIndicator size="small" color={colors.accent} />
+            ) : (
+              renderContent()
+            )}
+          </LinearGradient>
+        ) : (
+          <View style={[styles.standardInner, getPadding()]}>
+            {loading ? (
+              <ActivityIndicator size="small" color={colors.accent} />
+            ) : (
+              renderContent()
             )}
           </View>
         )}
@@ -189,6 +185,50 @@ export const Button: React.FC<ButtonProps> = ({
 };
 
 const styles = StyleSheet.create({
+  baseContainer: {
+    borderRadius: radii.full,
+    overflow: 'hidden',
+  },
+  gradientInner: {
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: radii.full,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.22)',
+    ...shadows.accent,
+    position: 'relative',
+  },
+  specularHighlight: {
+    position: 'absolute',
+    top: 1,
+    left: '12%',
+    right: '12%',
+    height: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.38)',
+    borderRadius: radii.full,
+  },
+  secondaryBorder: {
+    borderWidth: 1,
+    borderColor: colors.borderSubtle,
+    ...shadows.card,
+  },
+  outlineContainer: {
+    backgroundColor: 'transparent',
+    borderWidth: 1.5,
+    borderColor: colors.accent,
+  },
+  ghostContainer: {
+    backgroundColor: 'transparent',
+  },
+  standardInner: {
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  disabledContainer: {
+    opacity: 0.45,
+  },
   contentRow: {
     flexDirection: 'row',
     alignItems: 'center',

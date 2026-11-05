@@ -23,6 +23,7 @@ import { QuantityStepper } from '../../../components/common/QuantityStepper';
 import { RatingBadge } from '../../../components/common/RatingBadge';
 import { formatPaise } from '../../../utils/currency';
 import { api } from '../../../services/api';
+import { MOCK_MENU_ITEMS } from '../../../services/mockData';
 import { useCartStore } from '../../../store/cartStore';
 import { useFavoritesStore } from '../../../store/favoritesStore';
 import { MenuItem, MenuItemAddon } from '../../../types';
@@ -33,7 +34,9 @@ export default function FoodDetailsScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
 
-  const [dish, setDish] = useState<MenuItem | null>(null);
+  const [dish, setDish] = useState<MenuItem | null>(
+    MOCK_MENU_ITEMS.find((i) => i.id === (id || 'm-hyd-chicken-biryani')) || MOCK_MENU_ITEMS[0]
+  );
   const [quantity, setQuantity] = useState(1);
   const [selectedAddons, setSelectedAddons] = useState<MenuItemAddon[]>([]);
 

@@ -22,6 +22,7 @@ import { SegmentedControl } from '../../../components/common/SegmentedControl';
 import { SpecialPlateCard } from '../../../components/cards/SpecialPlateCard';
 import { FoodCard } from '../../../components/cards/FoodCard';
 import { api } from '../../../services/api';
+import { MOCK_CATEGORIES, MOCK_MENU_ITEMS } from '../../../services/mockData';
 import { useAuthStore } from '../../../store/authStore';
 import { useCartStore } from '../../../store/cartStore';
 import { MenuCategory, MenuItem, OrderType } from '../../../types';
@@ -31,13 +32,17 @@ export default function HomeScreen() {
   const { user } = useAuthStore();
   const { orderType, setOrderType } = useCartStore();
 
-  const [categories, setCategories] = useState<MenuCategory[]>([]);
-  const [featuredItem, setFeaturedItem] = useState<MenuItem | null>(null);
-  const [trendingItems, setTrendingItems] = useState<MenuItem[]>([]);
+  const [categories, setCategories] = useState<MenuCategory[]>(MOCK_CATEGORIES);
+  const [featuredItem, setFeaturedItem] = useState<MenuItem | null>(
+    MOCK_MENU_ITEMS.find((i) => i.isFeatured) || MOCK_MENU_ITEMS[0]
+  );
+  const [trendingItems, setTrendingItems] = useState<MenuItem[]>(
+    MOCK_MENU_ITEMS.filter((i) => i.categoryId === 'c-biryani')
+  );
 
-  // Entrance animations
-  const heroFade = useRef(new Animated.Value(0)).current;
-  const heroSlide = useRef(new Animated.Value(15)).current;
+  // Entrance animations (defaults to 1 and 0 for instant rendering)
+  const heroFade = useRef(new Animated.Value(1)).current;
+  const heroSlide = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     async function loadHomeData() {

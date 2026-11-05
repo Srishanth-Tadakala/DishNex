@@ -6,12 +6,17 @@
 
 ## 🌟 Visual Authority & Luxury Experience
 **DishNex** delivers an uncompromising, fine-dining digital sanctuary. Designed against the strict 14-screen luxury specification, DishNex features:
-- **Obsidian & Deep Emerald Surfaces** (`#071A14`, `#0B2118`, `#153A2A`, `#1C4934`)
-- **Luminous Chartreuse & Lime Interactive Elements** (`#DFFF63`, `#C5F15C`)
-- **Warm Flame Amber & Star Gold** (`#FFC66B`, `#F08A4B`)
-- **Tactile Culinary Paper Surfaces** (`#FFF8EA`)
-- **Warm Editorial Typography** (`Playfair Display`, `Manrope`, `Georgia`)
-- **Glassmorphic Depth, Spring Motion & Micro-Interactions**
+- **Obsidian & Deep Emerald Surfaces** (`#06130F`, `#0B1D15`, `#10271D`, `#193629`)
+- **Luminous Haute Chartreuse & Lime Interactive Elements** (`#D8F06B`, `#B7E44F`)
+- **Warm Flame Amber & Star Gold** (`#F5C042`, `#F08A4B`)
+- **Tactile Culinary Paper Surfaces** (`#F4F0E7`, `#EDE8DD`)
+- **Warm Editorial Typography** (`Playfair Display`, `Manrope`, `Georgia`, serif)
+- **Glassmorphic Depth, Spring Motion & Micro-Interactions**:
+  - Gliding spring indicator segmented selector with specular highlights.
+  - Multi-stop LinearGradient primary action buttons with top hairline sheen.
+  - Multi-stage heart bounce animations with sensory haptic feedback.
+  - 360-degree celebratory radial particle burst & pulsating cloche dome ring on order confirmation.
+  - Interactive stepper bump counters and card-level spring physics.
 
 ---
 

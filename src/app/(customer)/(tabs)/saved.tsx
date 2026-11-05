@@ -17,12 +17,15 @@ import { SegmentedControl } from '../../../components/common/SegmentedControl';
 import { FoodCard } from '../../../components/cards/FoodCard';
 import { useFavoritesStore } from '../../../store/favoritesStore';
 import { api } from '../../../services/api';
+import { MOCK_MENU_ITEMS } from '../../../services/mockData';
 import { MenuItem } from '../../../types';
 
 export default function SavedScreen() {
   const router = useRouter();
   const { favoriteDishIds, activeTab, setActiveTab } = useFavoritesStore();
-  const [favoriteItems, setFavoriteItems] = useState<MenuItem[]>([]);
+  const [favoriteItems, setFavoriteItems] = useState<MenuItem[]>(
+    MOCK_MENU_ITEMS.slice(0, 4)
+  );
 
   useEffect(() => {
     async function loadFavorites() {

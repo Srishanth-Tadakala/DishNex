@@ -1,20 +1,20 @@
 // ==============================================================================
-// DISHNEX SEGMENTED CONTROL (Pill Tab Selector)
-// Tactile Selection Transitions with Luminous Lime Highlights
+// DISHNEX SEGMENTED CONTROL (Industry-Grade Luxury Specification)
+// Fluid Gliding Spring Indicator, Specular Highlight & Tactile Haptic Selection
 // ==============================================================================
 
-import React from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
   ViewStyle,
-  Platform,
+  Animated,
 } from 'react-native';
-import * as Haptics from 'expo-haptics';
 import { colors } from '../../theme/colors';
 import { radii, shadows } from '../../theme/spacing';
+import { triggerHaptic } from '../../theme/animations';
 
 export interface SegmentOption<T extends string> {
   key: T;
@@ -34,29 +34,71 @@ export function SegmentedControl<T extends string>({
   onSelect,
   style,
 }: SegmentedControlProps<T>) {
+  const [containerWidth, setContainerWidth] = useState(0);
+  const selectedIndex = options.findIndex((opt) => opt.key === selectedKey);
+  const safeIndex = selectedIndex >= 0 ? selectedIndex : 0;
+
+  const slideAnim = useRef(new Animated.Value(safeIndex)).current;
+
+  useEffect(() => {
+    Animated.spring(slideAnim, {
+      toValue: safeIndex,
+      friction: 6.5,
+      tension: 65,
+      useNativeDriver: true,
+    }).start();
+  }, [safeIndex]);
+
   const handleSelect = (key: T) => {
     if (key !== selectedKey) {
-      try {
-        if (Platform.OS !== 'web') {
-          Haptics.selectionAsync();
-        }
-      } catch (_) { }
+      triggerHaptic.selection();
       onSelect(key);
     }
   };
 
+  const segmentWidth = containerWidth > 0 ? (containerWidth - 6) / options.length : 0;
+
   return (
-    <View style={[styles.container, style]}>
-      {options.map((opt) => {
+    <View
+      style={[styles.container, style]}
+      onLayout={(e) => setContainerWidth(e.nativeEvent.layout.width)}
+    >
+      {/* Gliding Active Indicator Pill */}
+      {segmentWidth > 0 && (
+        <Animated.View
+          style={[
+            styles.activeIndicator,
+            {
+              width: segmentWidth,
+              transform: [
+                {
+                  translateX: slideAnim.interpolate({
+                    inputRange: options.map((_, i) => i),
+                    outputRange: options.map((_, i) => i * segmentWidth),
+                  }),
+                },
+              ],
+            },
+          ]}
+        >
+          <View style={styles.specularHairline} />
+        </Animated.View>
+      )}
+
+      {/* Options Row */}
+      {options.map((opt, idx) => {
         const isSelected = opt.key === selectedKey;
+        // Fallback for unmeasured initial render
+        const showFallbackHighlight = segmentWidth === 0 && isSelected;
+
         return (
           <TouchableOpacity
             key={opt.key}
-            activeOpacity={0.8}
+            activeOpacity={0.85}
             onPress={() => handleSelect(opt.key)}
             style={[
               styles.segment,
-              isSelected ? styles.selectedSegment : styles.unselectedSegment,
+              showFallbackHighlight && styles.selectedSegmentFallback,
             ]}
             accessibilityRole="tab"
             accessibilityState={{ selected: isSelected }}
@@ -84,24 +126,43 @@ const styles = StyleSheet.create({
     padding: 3,
     borderWidth: 1,
     borderColor: colors.borderSubtle,
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  activeIndicator: {
+    position: 'absolute',
+    top: 3,
+    left: 3,
+    bottom: 3,
+    backgroundColor: colors.accent,
+    borderRadius: radii.full,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.28)',
+    ...shadows.accent,
+  },
+  specularHairline: {
+    position: 'absolute',
+    top: 1,
+    left: '15%',
+    right: '15%',
+    height: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.40)',
+    borderRadius: radii.full,
   },
   segment: {
     flex: 1,
-    paddingVertical: 8,
+    paddingVertical: 9,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: radii.full,
+    zIndex: 2,
   },
-  selectedSegment: {
+  selectedSegmentFallback: {
     backgroundColor: colors.accent,
-    ...shadows.accent,
-  },
-  unselectedSegment: {
-    backgroundColor: 'transparent',
   },
   label: {
     fontSize: 13,
-    fontWeight: '700',
+    fontWeight: '800',
     letterSpacing: 0.2,
   },
   selectedLabel: {

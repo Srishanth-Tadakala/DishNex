@@ -66,7 +66,7 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: 'rgba(255, 198, 107, 0.20)',
+    backgroundColor: colors.goldGlow,
   },
   title: {
     fontFamily: 'serif',

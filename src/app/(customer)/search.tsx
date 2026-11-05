@@ -19,6 +19,7 @@ import { colors } from '../../theme/colors';
 import { radii, spacing, shadows } from '../../theme/spacing';
 import { FoodCard } from '../../components/cards/FoodCard';
 import { api } from '../../services/api';
+import { MOCK_MENU_ITEMS } from '../../services/mockData';
 import { MenuItem } from '../../types';
 
 const SEARCH_FILTERS = [
@@ -31,7 +32,9 @@ export default function SearchScreen() {
   const router = useRouter();
   const [query, setQuery] = useState('Biryani');
   const [activeFilter, setActiveFilter] = useState<'all' | 'dishes' | 'categories'>('all');
-  const [results, setResults] = useState<MenuItem[]>([]);
+  const [results, setResults] = useState<MenuItem[]>(
+    MOCK_MENU_ITEMS.filter((i) => i.categoryId === 'c-biryani')
+  );
   const [isFocused, setIsFocused] = useState(false);
 
   useEffect(() => {

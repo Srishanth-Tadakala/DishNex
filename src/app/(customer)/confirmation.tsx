@@ -1,8 +1,7 @@
 // ==============================================================================
-// SCREEN 14 — ORDER CONFIRMATION (DishNex Luxury Celebration & State Animations)
+// SCREEN 14 — ORDER CONFIRMATION (Industry-Grade Luxury Specification)
 // Headline: Order Placed Successfully! 🎉
-// Info Card: Order ID #EMB83721 | Estimated Delivery 30-40 mins
-// Actions: Track Order (Primary Lime) | Back to Home
+// Ambient Aura, Staggered Celebratory Sparkles & Physical Spring Revelations
 // ==============================================================================
 
 import React, { useEffect, useRef } from 'react';
@@ -13,17 +12,28 @@ import {
   TouchableOpacity,
   Dimensions,
   Animated,
-  Platform,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import * as Haptics from 'expo-haptics';
 import { colors } from '../../theme/colors';
 import { radii, spacing, shadows } from '../../theme/spacing';
+import { triggerHaptic } from '../../theme/animations';
 import { DishNexFlameLogo } from '../../components/common/EmberFlameLogo';
 import { Button } from '../../components/common/Button';
 
 const { width } = Dimensions.get('window');
+
+// 8 celebratory particles in 360-degree radial coordinates
+const CELEBRATION_PARTICLES = [
+  { angle: 30, dist: 86, color: colors.accent, size: 7 },
+  { angle: 75, dist: 94, color: colors.gold, size: 6 },
+  { angle: 120, dist: 82, color: colors.success, size: 8 },
+  { angle: 165, dist: 90, color: colors.accent, size: 5 },
+  { angle: 210, dist: 88, color: colors.gold, size: 7 },
+  { angle: 255, dist: 96, color: colors.success, size: 6 },
+  { angle: 300, dist: 84, color: colors.accent, size: 8 },
+  { angle: 345, dist: 92, color: colors.gold, size: 5 },
+];
 
 export default function OrderConfirmationScreen() {
   const router = useRouter();
@@ -40,62 +50,100 @@ export default function OrderConfirmationScreen() {
   const clocheScale = useRef(new Animated.Value(0.6)).current;
   const clocheOpacity = useRef(new Animated.Value(0)).current;
   const checkScale = useRef(new Animated.Value(0)).current;
-  const cardSlide = useRef(new Animated.Value(20)).current;
+  const ringScale = useRef(new Animated.Value(1)).current;
+  const ringOpacity = useRef(new Animated.Value(0.6)).current;
+  const particleBurst = useRef(new Animated.Value(0)).current;
+  const cardSlide = useRef(new Animated.Value(24)).current;
   const cardOpacity = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    try {
-      if (Platform.OS !== 'web') {
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      }
-    } catch (_) {}
+    triggerHaptic.success();
 
     // 1. Cloche dome spring reveal
     Animated.parallel([
       Animated.timing(clocheOpacity, {
         toValue: 1,
-        duration: 400,
+        duration: 380,
         useNativeDriver: true,
       }),
       Animated.spring(clocheScale, {
         toValue: 1,
         friction: 5,
-        tension: 40,
-        useNativeDriver: true,
-      }),
-    ]).start();
-
-    // 2. Checkmark badge pop
-    Animated.sequence([
-      Animated.delay(300),
-      Animated.spring(checkScale, {
-        toValue: 1,
-        friction: 4,
         tension: 50,
         useNativeDriver: true,
       }),
     ]).start();
 
-    // 3. Card slide-up reveal
+    // 2. Checkmark badge pop & particle burst
     Animated.sequence([
-      Animated.delay(450),
+      Animated.delay(260),
       Animated.parallel([
-        Animated.timing(cardOpacity, {
+        Animated.spring(checkScale, {
           toValue: 1,
-          duration: 350,
+          friction: 3.5,
+          tension: 60,
           useNativeDriver: true,
         }),
-        Animated.spring(cardSlide, {
-          toValue: 0,
-          friction: 6,
+        Animated.spring(particleBurst, {
+          toValue: 1,
+          friction: 4,
           tension: 40,
           useNativeDriver: true,
         }),
       ]),
     ]).start();
+
+    // 3. Card slide-up reveal
+    Animated.sequence([
+      Animated.delay(420),
+      Animated.parallel([
+        Animated.timing(cardOpacity, {
+          toValue: 1,
+          duration: 320,
+          useNativeDriver: true,
+        }),
+        Animated.spring(cardSlide, {
+          toValue: 0,
+          friction: 6,
+          tension: 45,
+          useNativeDriver: true,
+        }),
+      ]),
+    ]).start();
+
+    // 4. Subtle pulsating ambient ring loop
+    Animated.loop(
+      Animated.sequence([
+        Animated.parallel([
+          Animated.timing(ringScale, {
+            toValue: 1.28,
+            duration: 1800,
+            useNativeDriver: true,
+          }),
+          Animated.timing(ringOpacity, {
+            toValue: 0,
+            duration: 1800,
+            useNativeDriver: true,
+          }),
+        ]),
+        Animated.parallel([
+          Animated.timing(ringScale, {
+            toValue: 1,
+            duration: 0,
+            useNativeDriver: true,
+          }),
+          Animated.timing(ringOpacity, {
+            toValue: 0.5,
+            duration: 0,
+            useNativeDriver: true,
+          }),
+        ]),
+      ])
+    ).start();
   }, []);
 
   const handleTrackOrder = () => {
+    triggerHaptic.light();
     router.push({
       pathname: '/(customer)/orders/[id]',
       params: { id: orderId || 'ord-683721' },
@@ -103,6 +151,7 @@ export default function OrderConfirmationScreen() {
   };
 
   const handleBackToHome = () => {
+    triggerHaptic.light();
     router.replace('/(customer)/(tabs)');
   };
 
@@ -113,13 +162,64 @@ export default function OrderConfirmationScreen() {
         <DishNexFlameLogo size="medium" showTagline={false} />
       </View>
 
-      {/* 2. Cloche Illustration with Animated Green Checkmark & Confetti Accents */}
+      {/* 2. Cloche Illustration with Animated Green Checkmark & Radial Particle Burst */}
       <View style={styles.illustrationContainer}>
-        {/* Subtle celebratory ambient sparkle dots */}
-        <View style={[styles.sparkleDot, { top: -8, left: 16 }]} />
-        <View style={[styles.sparkleDot, { top: 12, right: 10, width: 6, height: 6 }]} />
-        <View style={[styles.sparkleDot, { bottom: 20, left: -6, width: 5, height: 5 }]} />
-        <View style={[styles.sparkleDot, { bottom: 8, right: 18, width: 7, height: 7 }]} />
+        {/* Pulsating ambient ring */}
+        <Animated.View
+          style={[
+            styles.ambientRing,
+            {
+              transform: [{ scale: ringScale }],
+              opacity: ringOpacity,
+            },
+          ]}
+        />
+
+        {/* 360-degree Celebratory Sparkle Particles */}
+        {CELEBRATION_PARTICLES.map((p, idx) => {
+          const rad = (p.angle * Math.PI) / 180;
+          const targetX = Math.cos(rad) * p.dist;
+          const targetY = Math.sin(rad) * p.dist;
+
+          return (
+            <Animated.View
+              key={idx}
+              style={[
+                styles.particle,
+                {
+                  width: p.size,
+                  height: p.size,
+                  borderRadius: p.size / 2,
+                  backgroundColor: p.color,
+                  transform: [
+                    {
+                      translateX: particleBurst.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [0, targetX],
+                      }),
+                    },
+                    {
+                      translateY: particleBurst.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [0, targetY],
+                      }),
+                    },
+                    {
+                      scale: particleBurst.interpolate({
+                        inputRange: [0, 0.5, 1],
+                        outputRange: [0, 1.3, 1],
+                      }),
+                    },
+                  ],
+                  opacity: particleBurst.interpolate({
+                    inputRange: [0, 0.2, 1],
+                    outputRange: [0, 1, 0.85],
+                  }),
+                },
+              ]}
+            />
+          );
+        })}
 
         <Animated.View
           style={[
@@ -218,14 +318,20 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginVertical: spacing.lg,
     position: 'relative',
+    width: 220,
+    height: 220,
   },
-  sparkleDot: {
+  ambientRing: {
     position: 'absolute',
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: colors.accent,
-    opacity: 0.7,
+    width: 170,
+    height: 170,
+    borderRadius: 85,
+    borderWidth: 2,
+    borderColor: colors.accent,
+  },
+  particle: {
+    position: 'absolute',
+    ...shadows.accent,
   },
   clocheCircle: {
     width: 140,

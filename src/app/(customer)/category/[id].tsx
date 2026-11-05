@@ -18,6 +18,7 @@ import { radii, spacing, shadows } from '../../../theme/spacing';
 import { Header } from '../../../components/common/Header';
 import { FoodCard } from '../../../components/cards/FoodCard';
 import { api } from '../../../services/api';
+import { MOCK_MENU_ITEMS } from '../../../services/mockData';
 import { MenuItem } from '../../../types';
 
 const DIETARY_FILTERS = [
@@ -31,7 +32,9 @@ export default function CategoryMenuScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
 
   const [categoryName, setCategoryName] = useState('Biryani');
-  const [items, setItems] = useState<MenuItem[]>([]);
+  const [items, setItems] = useState<MenuItem[]>(
+    MOCK_MENU_ITEMS.filter((i) => i.categoryId === 'c-biryani')
+  );
   const [activeDietary, setActiveDietary] = useState('all');
 
   useEffect(() => {

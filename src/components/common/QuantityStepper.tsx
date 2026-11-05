@@ -1,6 +1,6 @@
 // ==============================================================================
-// DISHNEX QUANTITY STEPPER COMPONENT ([-] 1 [+])
-// Tactile Controls with Spring Bump & Haptic Feedback
+// DISHNEX QUANTITY STEPPER COMPONENT ([-] 1 [+]) (Industry-Grade)
+// Tactile Controls with Spring Bump, Counter Pop & Haptic Dynamics
 // ==============================================================================
 
 import React, { useRef, useEffect } from 'react';
@@ -10,12 +10,11 @@ import {
   TouchableOpacity,
   StyleSheet,
   Animated,
-  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import * as Haptics from 'expo-haptics';
 import { colors } from '../../theme/colors';
-import { radii } from '../../theme/spacing';
+import { radii, shadows } from '../../theme/spacing';
+import { triggerHaptic } from '../../theme/animations';
 
 interface QuantityStepperProps {
   quantity: number;
@@ -32,38 +31,40 @@ export const QuantityStepper: React.FC<QuantityStepperProps> = ({
 }) => {
   const isSmall = size === 'small';
   const numScale = useRef(new Animated.Value(1)).current;
+  const decScale = useRef(new Animated.Value(1)).current;
+  const incScale = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
     Animated.sequence([
       Animated.timing(numScale, {
-        toValue: 1.25,
+        toValue: 1.28,
         duration: 90,
         useNativeDriver: true,
       }),
       Animated.spring(numScale, {
         toValue: 1,
         friction: 4,
-        tension: 40,
+        tension: 50,
         useNativeDriver: true,
       }),
     ]).start();
   }, [quantity]);
 
   const handleDec = () => {
-    try {
-      if (Platform.OS !== 'web') {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      }
-    } catch (_) {}
+    triggerHaptic.light();
+    Animated.sequence([
+      Animated.timing(decScale, { toValue: 0.8, duration: 60, useNativeDriver: true }),
+      Animated.spring(decScale, { toValue: 1, friction: 3, tension: 50, useNativeDriver: true }),
+    ]).start();
     onDecrement();
   };
 
   const handleInc = () => {
-    try {
-      if (Platform.OS !== 'web') {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      }
-    } catch (_) {}
+    triggerHaptic.light();
+    Animated.sequence([
+      Animated.timing(incScale, { toValue: 0.8, duration: 60, useNativeDriver: true }),
+      Animated.spring(incScale, { toValue: 1, friction: 3, tension: 50, useNativeDriver: true }),
+    ]).start();
     onIncrement();
   };
 
@@ -82,11 +83,13 @@ export const QuantityStepper: React.FC<QuantityStepperProps> = ({
         accessibilityRole="button"
         accessibilityLabel="Decrease quantity"
       >
-        <Ionicons
-          name={quantity === 1 ? 'trash-outline' : 'remove'}
-          size={isSmall ? 13 : 16}
-          color={quantity === 1 ? colors.error : colors.textSecondary}
-        />
+        <Animated.View style={{ transform: [{ scale: decScale }] }}>
+          <Ionicons
+            name={quantity === 1 ? 'trash-outline' : 'remove'}
+            size={isSmall ? 13 : 16}
+            color={quantity === 1 ? colors.error : colors.textSecondary}
+          />
+        </Animated.View>
       </TouchableOpacity>
 
       <Animated.Text
@@ -106,11 +109,13 @@ export const QuantityStepper: React.FC<QuantityStepperProps> = ({
         accessibilityRole="button"
         accessibilityLabel="Increase quantity"
       >
-        <Ionicons
-          name="add"
-          size={isSmall ? 14 : 17}
-          color={colors.accent}
-        />
+        <Animated.View style={{ transform: [{ scale: incScale }] }}>
+          <Ionicons
+            name="add"
+            size={isSmall ? 14 : 17}
+            color={colors.accent}
+          />
+        </Animated.View>
       </TouchableOpacity>
     </View>
   );
@@ -125,16 +130,17 @@ const styles = StyleSheet.create({
     borderColor: colors.borderSubtle,
     borderWidth: 1,
     borderRadius: radii.full,
+    ...shadows.card,
   },
   smallContainer: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    minWidth: 78,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    minWidth: 80,
   },
   mediumContainer: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    minWidth: 96,
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    minWidth: 100,
   },
   button: {
     alignItems: 'center',
@@ -142,7 +148,7 @@ const styles = StyleSheet.create({
   },
   quantityText: {
     color: colors.textPrimary,
-    fontWeight: '700',
+    fontWeight: '800',
     marginHorizontal: 8,
   },
 });

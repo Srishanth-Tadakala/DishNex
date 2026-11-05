@@ -19,13 +19,14 @@ import { radii, spacing, shadows } from '../../../theme/spacing';
 import { Header } from '../../../components/common/Header';
 import { CategoryCard } from '../../../components/cards/CategoryCard';
 import { api } from '../../../services/api';
+import { MOCK_CATEGORIES } from '../../../services/mockData';
 import { MenuCategory } from '../../../types';
 
 const FILTER_TAGS = ['All', 'Veg', 'Non-Veg', 'Beverages'];
 
 export default function MenuScreen() {
   const router = useRouter();
-  const [categories, setCategories] = useState<MenuCategory[]>([]);
+  const [categories, setCategories] = useState<MenuCategory[]>(MOCK_CATEGORIES);
   const [activeFilter, setActiveFilter] = useState('All');
 
   useEffect(() => {

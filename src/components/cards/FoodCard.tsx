@@ -1,6 +1,6 @@
 // ==============================================================================
-// DISHNEX FOOD CARD (Exact Reference Screen 8 / 10 / 11 Layout)
-// Rich Surface Depth, Heart Bounce Animation & Tactile Add-to-Cart Feedback
+// DISHNEX FOOD CARD (Industry-Grade Luxury Specification)
+// Physical Card Spring Dynamics, Heart Pop, Add-to-Cart Splash & Tactile Paper
 // ==============================================================================
 
 import React, { useRef } from 'react';
@@ -11,13 +11,12 @@ import {
   StyleSheet,
   Image,
   Animated,
-  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import * as Haptics from 'expo-haptics';
 import { MenuItem } from '../../types';
 import { colors } from '../../theme/colors';
 import { radii, spacing, shadows } from '../../theme/spacing';
+import { triggerHaptic } from '../../theme/animations';
 import { DietaryBadge } from '../common/DietaryBadge';
 import { RatingBadge } from '../common/RatingBadge';
 import { formatPaise } from '../../utils/currency';
@@ -42,29 +41,45 @@ export const FoodCard: React.FC<FoodCardProps> = ({
   const isFav = isDishFavorite(item.id);
   const isIvory = variant === 'ivory';
 
+  // Overall card scale
+  const cardScale = useRef(new Animated.Value(1)).current;
   // Heart bounce animation
   const heartScale = useRef(new Animated.Value(1)).current;
   // Add button spring scale
   const addScale = useRef(new Animated.Value(1)).current;
 
+  const handleCardPressIn = () => {
+    Animated.spring(cardScale, {
+      toValue: 0.985,
+      useNativeDriver: true,
+      friction: 5,
+      tension: 100,
+    }).start();
+  };
+
+  const handleCardPressOut = () => {
+    Animated.spring(cardScale, {
+      toValue: 1,
+      useNativeDriver: true,
+      friction: 4,
+      tension: 60,
+    }).start();
+  };
+
   const handleFavoritePress = (e: any) => {
     e.stopPropagation();
-    try {
-      if (Platform.OS !== 'web') {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      }
-    } catch (_) {}
+    triggerHaptic.medium();
 
     Animated.sequence([
       Animated.timing(heartScale, {
-        toValue: 1.4,
-        duration: 120,
+        toValue: 1.45,
+        duration: 110,
         useNativeDriver: true,
       }),
       Animated.spring(heartScale, {
         toValue: 1,
         friction: 3,
-        tension: 40,
+        tension: 50,
         useNativeDriver: true,
       }),
     ]).start();
@@ -74,22 +89,18 @@ export const FoodCard: React.FC<FoodCardProps> = ({
 
   const handleAddPress = (e: any) => {
     e.stopPropagation();
-    try {
-      if (Platform.OS !== 'web') {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      }
-    } catch (_) {}
+    triggerHaptic.light();
 
     Animated.sequence([
       Animated.timing(addScale, {
-        toValue: 0.85,
-        duration: 80,
+        toValue: 0.82,
+        duration: 70,
         useNativeDriver: true,
       }),
       Animated.spring(addScale, {
         toValue: 1,
         friction: 3,
-        tension: 40,
+        tension: 60,
         useNativeDriver: true,
       }),
     ]).start();
@@ -98,109 +109,121 @@ export const FoodCard: React.FC<FoodCardProps> = ({
   };
 
   return (
-    <TouchableOpacity
-      activeOpacity={0.88}
-      onPress={onPress}
-      style={[styles.card, isIvory && styles.cardIvory]}
-      accessibilityRole="button"
-      accessibilityLabel={`${item.name}, ${formatPaise(item.pricePaise)}`}
-    >
-      {/* Food Thumbnail with crisp rounded corners */}
-      <Image
-        source={{ uri: item.imageUrl }}
-        style={styles.image}
-        resizeMode="cover"
-      />
+    <Animated.View style={{ transform: [{ scale: cardScale }] }}>
+      <TouchableOpacity
+        activeOpacity={0.94}
+        onPress={onPress}
+        onPressIn={handleCardPressIn}
+        onPressOut={handleCardPressOut}
+        style={[styles.card, isIvory ? styles.cardIvory : styles.cardDark]}
+        accessibilityRole="button"
+        accessibilityLabel={`${item.name}, ${formatPaise(item.pricePaise)}`}
+      >
+        {/* Food Thumbnail with crisp rounded corners */}
+        <View style={styles.imageContainer}>
+          <Image
+            source={{ uri: item.imageUrl }}
+            style={styles.image}
+            resizeMode="cover"
+          />
+        </View>
 
-      {/* Middle Content */}
-      <View style={styles.infoContainer}>
-        <View style={styles.titleRow}>
-          <DietaryBadge type={item.dietaryClassification} size={14} />
-          <Text
-            style={[styles.name, isIvory && styles.nameIvory]}
-            numberOfLines={1}
-          >
-            {item.name}
+        {/* Middle Content */}
+        <View style={styles.infoContainer}>
+          <View style={styles.titleRow}>
+            <DietaryBadge type={item.dietaryClassification} size={14} />
+            <Text
+              style={[styles.name, isIvory && styles.nameIvory]}
+              numberOfLines={1}
+            >
+              {item.name}
+            </Text>
+          </View>
+
+          <RatingBadge
+            rating={item.rating}
+            reviewsCount={item.reviewsCount}
+            size="small"
+            textColor={isIvory ? '#06130F' : undefined}
+          />
+
+          <Text style={[styles.price, isIvory && styles.priceIvory]}>
+            {formatPaise(item.pricePaise)}
           </Text>
         </View>
 
-        <RatingBadge
-          rating={item.rating}
-          reviewsCount={item.reviewsCount}
-          size="small"
-          textColor={isIvory ? '#06130F' : undefined}
-        />
-
-        <Text style={[styles.price, isIvory && styles.priceIvory]}>
-          {formatPaise(item.pricePaise)}
-        </Text>
-      </View>
-
-      {/* Right Column (Heart & Add to Cart) */}
-      <View style={styles.actionsContainer}>
-        <TouchableOpacity
-          onPress={handleFavoritePress}
-          activeOpacity={0.7}
-          style={styles.favoriteButton}
-          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-          accessibilityRole="button"
-          accessibilityLabel={isFav ? 'Remove from favorites' : 'Add to favorites'}
-        >
-          <Animated.View style={{ transform: [{ scale: heartScale }] }}>
-            <Ionicons
-              name={isFav ? 'heart' : 'heart-outline'}
-              size={19}
-              color={isFav ? '#FF4D4D' : isIvory ? '#91A397' : colors.textSecondary}
-            />
-          </Animated.View>
-        </TouchableOpacity>
-
-        {showAddButton && (
+        {/* Right Column (Heart & Add to Cart) */}
+        <View style={styles.actionsContainer}>
           <TouchableOpacity
-            onPress={handleAddPress}
-            activeOpacity={0.8}
+            onPress={handleFavoritePress}
+            activeOpacity={0.7}
+            style={styles.favoriteButton}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             accessibilityRole="button"
-            accessibilityLabel={`Add ${item.name} to cart`}
+            accessibilityLabel={isFav ? 'Remove from favorites' : 'Add to favorites'}
           >
-            <Animated.View
-              style={[styles.addButton, { transform: [{ scale: addScale }] }]}
-            >
-              <Ionicons name="add" size={19} color={colors.textDark} />
+            <Animated.View style={{ transform: [{ scale: heartScale }] }}>
+              <Ionicons
+                name={isFav ? 'heart' : 'heart-outline'}
+                size={20}
+                color={isFav ? '#FF4D4D' : isIvory ? '#8A998E' : colors.textSecondary}
+              />
             </Animated.View>
           </TouchableOpacity>
-        )}
-      </View>
-    </TouchableOpacity>
+
+          {showAddButton && (
+            <TouchableOpacity
+              onPress={handleAddPress}
+              activeOpacity={0.8}
+              accessibilityRole="button"
+              accessibilityLabel={`Add ${item.name} to cart`}
+            >
+              <Animated.View
+                style={[styles.addButton, { transform: [{ scale: addScale }] }]}
+              >
+                <Ionicons name="add" size={19} color={colors.textDark} />
+              </Animated.View>
+            </TouchableOpacity>
+          )}
+        </View>
+      </TouchableOpacity>
+    </Animated.View>
   );
 };
 
 const styles = StyleSheet.create({
   card: {
     flexDirection: 'row',
-    backgroundColor: colors.surface,
     borderRadius: radii.xl,
     padding: spacing.md,
     marginBottom: spacing.md,
+    alignItems: 'center',
+    position: 'relative',
+  },
+  cardDark: {
+    backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.borderSubtle,
-    alignItems: 'center',
     ...shadows.card,
   },
   cardIvory: {
     backgroundColor: '#F4F0E7',
+    borderWidth: 1,
     borderColor: 'rgba(0, 0, 0, 0.06)',
+    ...shadows.cardIvory,
   },
-  nameIvory: {
-    color: '#06130F',
-  },
-  priceIvory: {
-    color: '#06130F',
-  },
-  image: {
+  imageContainer: {
     width: 76,
     height: 76,
     borderRadius: radii.lg,
+    overflow: 'hidden',
     backgroundColor: colors.surfaceSecondary,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+  },
+  image: {
+    width: '100%',
+    height: '100%',
   },
   infoContainer: {
     flex: 1,
@@ -219,11 +242,17 @@ const styles = StyleSheet.create({
     marginLeft: 6,
     flex: 1,
   },
+  nameIvory: {
+    color: '#06130F',
+  },
   price: {
     fontSize: 15,
     fontWeight: '800',
     color: colors.textPrimary,
     marginTop: 4,
+  },
+  priceIvory: {
+    color: '#06130F',
   },
   actionsContainer: {
     height: 76,
@@ -232,15 +261,17 @@ const styles = StyleSheet.create({
     paddingLeft: spacing.sm,
   },
   favoriteButton: {
-    padding: 3,
+    padding: 4,
   },
   addButton: {
-    width: 28,
-    height: 28,
+    width: 30,
+    height: 30,
     borderRadius: radii.sm,
     backgroundColor: colors.accent,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.25)',
     ...shadows.accent,
   },
 });

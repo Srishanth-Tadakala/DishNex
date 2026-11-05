@@ -1,5 +1,5 @@
 // ==============================================================================
-// DISHNEX DESIGN SYSTEM — SPACING, RADII & ELEVATED SHADOWS
+// DISHNEX DESIGN SYSTEM — SPACING, RADII & ELEVATED SHADOWS (Industry-Grade)
 // ==============================================================================
 
 export const spacing = {
@@ -41,6 +41,13 @@ export const shadows = {
     shadowRadius: 14,
     elevation: 8,
   },
+  cardIvory: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
+  },
   accent: {
     shadowColor: '#D8F06B',
     shadowOffset: { width: 0, height: 4 },
@@ -54,6 +61,13 @@ export const shadows = {
     shadowOpacity: 0.25,
     shadowRadius: 10,
     elevation: 4,
+  },
+  goldGlow: {
+    shadowColor: '#F5C042',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.30,
+    shadowRadius: 10,
+    elevation: 5,
   },
   bottomBar: {
     shadowColor: '#000',
