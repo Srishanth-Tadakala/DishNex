@@ -20,12 +20,17 @@ import { api } from '../../../services/api';
 import { MOCK_MENU_ITEMS } from '../../../services/mockData';
 import { MenuItem } from '../../../types';
 
+const DEFAULT_SAVED_ITEMS = [
+  MOCK_MENU_ITEMS.find((i) => i.id === 'm-hyd-chicken-biryani'),
+  MOCK_MENU_ITEMS.find((i) => i.id === 'm-choco-lava-cake'),
+  MOCK_MENU_ITEMS.find((i) => i.id === 'm-paneer-butter-masala'),
+  MOCK_MENU_ITEMS.find((i) => i.id === 'm-mango-shake'),
+].filter(Boolean) as MenuItem[];
+
 export default function SavedScreen() {
   const router = useRouter();
   const { favoriteDishIds, activeTab, setActiveTab } = useFavoritesStore();
-  const [favoriteItems, setFavoriteItems] = useState<MenuItem[]>(
-    MOCK_MENU_ITEMS.slice(0, 4)
-  );
+  const [favoriteItems, setFavoriteItems] = useState<MenuItem[]>(DEFAULT_SAVED_ITEMS);
 
   useEffect(() => {
     async function loadFavorites() {
@@ -33,7 +38,9 @@ export default function SavedScreen() {
       const filtered = allItems.filter((item) =>
         favoriteDishIds.includes(item.id)
       );
-      setFavoriteItems(filtered);
+      if (filtered.length > 0) {
+        setFavoriteItems(filtered);
+      }
     }
     loadFavorites();
   }, [favoriteDishIds]);
@@ -73,9 +80,9 @@ export default function SavedScreen() {
           renderItem={({ item }) => (
             <FoodCard
               item={item}
-              variant="ivory"
+              variant="dark"
               onPress={() => router.push(`/(customer)/food/${item.id}`)}
-              showAddButton={true}
+              showAddButton={false}
             />
           )}
           ListEmptyComponent={

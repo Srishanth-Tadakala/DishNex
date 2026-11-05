@@ -114,7 +114,6 @@ export default function CategoryMenuScreen() {
         renderItem={({ item }) => (
           <FoodCard
             item={item}
-            variant="ivory"
             onPress={() => router.push(`/(customer)/food/${item.id}`)}
           />
         )}

@@ -11,3 +11,4 @@ if (typeof window === 'undefined') {
   // Mapping to useEffect silences the mismatch warning cleanly.
   (React as any).useLayoutEffect = React.useEffect;
 }
+

@@ -24,11 +24,11 @@ export default function SplashScreen() {
   const { hasCompletedOnboarding, isAuthenticated } = useAuthStore();
 
   // Animation values
-  const logoOpacity = useRef(new Animated.Value(0)).current;
-  const logoScale = useRef(new Animated.Value(0.88)).current;
-  const heroOpacity = useRef(new Animated.Value(0)).current;
-  const heroTranslateY = useRef(new Animated.Value(20)).current;
-  const progressAnim = useRef(new Animated.Value(0.15)).current;
+  const logoOpacity = useRef(new Animated.Value(1)).current;
+  const logoScale = useRef(new Animated.Value(1)).current;
+  const heroOpacity = useRef(new Animated.Value(1)).current;
+  const heroTranslateY = useRef(new Animated.Value(0)).current;
+  const progressAnim = useRef(new Animated.Value(0.55)).current;
   const glowPulse = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {

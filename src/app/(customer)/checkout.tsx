@@ -25,6 +25,7 @@ import { useCartStore } from '../../store/cartStore';
 import { useAuthStore } from '../../store/authStore';
 import { api } from '../../services/api';
 import { paymentService } from '../../services/payments';
+import { MOCK_SAVED_ADDRESSES } from '../../services/mockData';
 import { Address, OrderType, PaymentMethod } from '../../types';
 
 export default function CheckoutScreen() {
@@ -45,8 +46,10 @@ export default function CheckoutScreen() {
     clearCart,
   } = useCartStore();
 
-  const [addresses, setAddresses] = useState<Address[]>([]);
-  const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
+  const [addresses, setAddresses] = useState<Address[]>(MOCK_SAVED_ADDRESSES);
+  const [selectedAddress, setSelectedAddress] = useState<Address | null>(
+    MOCK_SAVED_ADDRESSES[0] || null
+  );
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('upi');
   const [isProcessing, setIsProcessing] = useState(false);
 
