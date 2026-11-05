@@ -55,6 +55,7 @@ export default function ProfileScreen() {
                 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&q=80',
             }}
             style={styles.avatar}
+            resizeMode="cover"
           />
           <View style={styles.userInfo}>
             <Text style={styles.userName}>{user?.fullName || 'Siddu'}</Text>

@@ -3,6 +3,7 @@
 // Role-protected guard ensuring only authorized staff/manager/owner can access
 // ==============================================================================
 
+import '../../utils/ssr-polyfill';
 import React, { useEffect } from 'react';
 import { Stack, useRouter } from 'expo-router';
 import { useAuthStore } from '../../store/authStore';

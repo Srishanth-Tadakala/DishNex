@@ -3,6 +3,7 @@
 // Luxury Emerald Tab Bar with Spring Icon Dynamics & Tactile Selection
 // ==============================================================================
 
+import '../../../utils/ssr-polyfill';
 import React, { useRef, useEffect } from 'react';
 import { Tabs } from 'expo-router';
 import { StyleSheet, Platform, Animated, View } from 'react-native';

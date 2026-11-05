@@ -2,6 +2,7 @@
 // EMBER ROOT LAYOUT (_layout.tsx)
 // ==============================================================================
 
+import '../utils/ssr-polyfill';
 import React, { useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { Stack } from 'expo-router';
