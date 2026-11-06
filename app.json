@@ -1,11 +1,11 @@
 {
   "expo": {
     "name": "DishNex",
-    "slug": "ember",
+    "slug": "dishnex",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "ember",
+    "scheme": "dishnex",
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
     "splash": {
@@ -21,7 +21,12 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#06130F"
       },
-      "package": "com.ember.restaurant"
+      "package": "com.dishnex.restaurant",
+      "permissions": [
+        "INTERNET",
+        "VIBRATE",
+        "ACCESS_NETWORK_STATE"
+      ]
     },
     "web": {
       "bundler": "metro",
